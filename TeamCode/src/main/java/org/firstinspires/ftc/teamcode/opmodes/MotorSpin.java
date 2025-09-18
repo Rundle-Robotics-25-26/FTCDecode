@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+@Autonomous(name = "Motor Spin Test")
 public class MotorSpin extends OpMode {
 
     DcMotor motor;
