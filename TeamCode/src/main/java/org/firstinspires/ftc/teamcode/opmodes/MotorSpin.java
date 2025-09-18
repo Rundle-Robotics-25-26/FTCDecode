@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Autonomous(name = "Motor Spin Test")
@@ -20,7 +21,7 @@ public class MotorSpin extends OpMode {
 
     @Override
     public void loop() {
-        motor.setPower(0.7);
+        motor.setPower(1.0);
     }
 
 }
