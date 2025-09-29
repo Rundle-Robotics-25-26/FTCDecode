@@ -28,6 +28,8 @@ public class ColorSensor {
 
     float gain = 2;
 
+    float runningSum = 0f;
+
     // Once per loop, we will update this hsvValues array. The first element (0) will contain the
     // hue, the second element (1) will contain the saturation, and the third element (2) will
     // contain the value. See http://web.archive.org/web/20190311170843/https://infohost.nmt.edu/tcc/help/pubs/colortheory/web/hsv.html
@@ -47,11 +49,36 @@ public class ColorSensor {
         colorSensor.setGain(gain);
     }
 
-    public void Update() {
+    public String Update() {
+        // calculates the average hue out of 100 latest hue results
         float recentHue = GetHue();
-
         hueHistory.add(recentHue);
+        runningSum += recentHue;
 
+        if (hueHistory.size() > 100) {
+            float removedHue = hueHistory.remove(0);
+            runningSum -= removedHue;
+        }
+
+        float avg = runningSum / hueHistory.size();
+
+        telemetry.addData("Rolling hue average:", "%.2f", avg);
+
+        // Tune these color detector results
+        // Hue values are from 0-360
+        final Float COLOR_ACCURACY = 20f; // how much the hue can differ from the targeted value
+        final Float GREEN_HUE = 115f;
+        final Float PURPLE_HUE = 275f;
+
+        String sensedColor = "NONE";
+        if (GREEN_HUE - COLOR_ACCURACY <= avg && avg <= GREEN_HUE + COLOR_ACCURACY) {
+            sensedColor = "GREEN BALL";
+        } else if (PURPLE_HUE - COLOR_ACCURACY <= avg && avg <= PURPLE_HUE + COLOR_ACCURACY) {
+            sensedColor = "PURPLE BALL";
+        }
+
+        telemetry.addData("Sensed ball color: ", sensedColor);
+        return sensedColor;
     }
 
     public float GetHue() {
