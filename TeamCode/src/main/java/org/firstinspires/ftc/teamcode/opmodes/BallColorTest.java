@@ -13,11 +13,11 @@ public class BallColorTest extends OpMode {
 
     @Override
     public void loop() {
-        String sensedColor = colorSensor.Update();
+        colorSensor.Update();
     }
 
     @Override
     public void init() {
-        colorSensor.Init();
+        colorSensor.Init(hardwareMap, telemetry);
     }
 }

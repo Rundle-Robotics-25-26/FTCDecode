@@ -2,10 +2,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
@@ -16,8 +14,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 public class ColorSensor {
 
@@ -27,6 +25,7 @@ public class ColorSensor {
     View relativeLayout;
 
     float gain = 2;
+    int i;
 
     float runningSum = 0f;
 
@@ -36,7 +35,10 @@ public class ColorSensor {
     // for an explanation of HSV color.
     final float[] hsvValues = new float[3];
 
-    public void Init() {
+    Telemetry telemetry;
+
+    public void Init(HardwareMap hardwareMap, Telemetry tele) {
+        telemetry = tele;
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
         relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
@@ -54,10 +56,14 @@ public class ColorSensor {
         float recentHue = GetHue();
         hueHistory.add(recentHue);
         runningSum += recentHue;
+        i++;
 
         if (hueHistory.size() > 100) {
             float removedHue = hueHistory.remove(0);
             runningSum -= removedHue;
+        }
+        if (i >= 100) {
+            i = 0;
         }
 
         float avg = runningSum / hueHistory.size();
@@ -67,8 +73,8 @@ public class ColorSensor {
         // Tune these color detector results
         // Hue values are from 0-360
         final Float COLOR_ACCURACY = 20f; // how much the hue can differ from the targeted value
-        final Float GREEN_HUE = 115f;
-        final Float PURPLE_HUE = 275f;
+        final Float GREEN_HUE = 160f;
+        final Float PURPLE_HUE = 240f;
 
         String sensedColor = "NONE";
         if (GREEN_HUE - COLOR_ACCURACY <= avg && avg <= GREEN_HUE + COLOR_ACCURACY) {
@@ -78,6 +84,9 @@ public class ColorSensor {
         }
 
         telemetry.addData("Sensed ball color: ", sensedColor);
+        telemetry.addData("Update", i);
+
+        telemetry.update();
         return sensedColor;
     }
 
@@ -116,8 +125,6 @@ public class ColorSensor {
         if (colorSensor instanceof DistanceSensor) {
             telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorSensor).getDistance(DistanceUnit.CM));
         }
-
-        telemetry.update();
 
         // Change the Robot Controller's background color to match the color detected by the color sensor.
         relativeLayout.post(new Runnable() {
