@@ -41,7 +41,7 @@ public class OpSpindexerTest1 extends OpMode {
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);
-        telemetry.addData("Current encoded position", spindexer.getMotorPosition());
+        telemetry.addData("Current encoded position", spindexerMotor.getCurrentPosition());
         telemetry.update();
     }
 }

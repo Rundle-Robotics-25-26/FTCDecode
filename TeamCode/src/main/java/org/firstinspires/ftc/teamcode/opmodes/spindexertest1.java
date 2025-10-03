@@ -20,7 +20,7 @@ public class spindexertest1 {
     private DcMotor Spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
     private double ticksPerRotation = 537.6; // CHANGE DEPENDING ON ROBOT
-    private double targetPositionMultiple = ticksPerRotation/3;
+    private double targetPositionMultiple = ticksPerRotation / 3;
     // find positions of all spindexer indexes
     private double positionOne = targetPositionMultiple;
     private double positionTwo = targetPositionMultiple * 2;
@@ -36,8 +36,6 @@ public class spindexertest1 {
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
     }
-
-    public int getMotorPosition() {return Spindexer.getCurrentPosition();}
 
     // initialising the motor with fresh values (resets encoder)
     public void freshInit(DcMotor motor) {
@@ -55,38 +53,46 @@ public class spindexertest1 {
         Spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
     */
-    public long getSpindexerNearest(){
+    public long getSpindexerNearest() {
         // find nearest position
-        double positionRatio =  Spindexer.getCurrentPosition() / targetPositionMultiple;
+        double positionRatio = Spindexer.getCurrentPosition() / targetPositionMultiple;
         if (Math.round(positionRatio) == 0) {
             positionRatio = 1.0;
         }
         return Math.round(positionRatio);
     }
 
-    public void GoToPos(int pos) {
-        if (currentPosition == pos) {
-            // dont do anything else if already at or moving to current position
+    public void GoToPos(int newPos) {
+        if (currentPosition == newPos || Spindexer.isBusy()) {
             return;
         }
 
-        currentPosition = pos;
+        int newClockwisePos = (currentPosition % 3) + 1;           // 1->2, 2->3, 3->1
+        int newCounterClockwisePos = ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
 
-        int targetPosition;
-        if (pos == 1) { targetPosition = (int) Math.round(positionOne); }
-        else if (pos == 2) { targetPosition = (int) Math.round(positionTwo); }
-        else { targetPosition = (int) Math.round(positionThree); }
-
-        if (targetPosition > Spindexer.getCurrentPosition()) {
-            Spindexer.setPower(SPEED);
-            Spindexer.setTargetPosition(targetPosition);
+        if (newPos == newClockwisePos) {
+            rotateClockwise();
+        } else if (newPos == newCounterClockwisePos) {
+            rotateCounterclockwise();
         } else {
-            Spindexer.setPower(-SPEED);
-            Spindexer.setTargetPosition(targetPosition);
+            // Should never happen if positions are 1,2,3
+            return;
         }
 
+        currentPosition = newPos;
     }
 
+    private void rotateClockwise() {
+        int targetPosition = Spindexer.getCurrentPosition() + (int)targetPositionMultiple;
+        Spindexer.setPower(SPEED);
+        Spindexer.setTargetPosition(targetPosition);
+    }
+
+    private void rotateCounterclockwise() {
+        int targetPosition = Spindexer.getCurrentPosition() - (int)targetPositionMultiple;
+        Spindexer.setPower(-SPEED);
+        Spindexer.setTargetPosition(targetPosition);
+    }
     /*
     // specific for each position should make a general position
     public void spindexerToPosOne(){
