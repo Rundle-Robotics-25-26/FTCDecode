@@ -20,14 +20,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class ColorSensor {
 
     ArrayList<Float> hueHistory = new ArrayList<>();
+    public List<Integer> colorScores = new ArrayList<>(); // Rolling list of numbers 1, 0, -1. Number is based off of sensed color (1 = green, -1 = purple, 0 = other)
     NormalizedColorSensor colorSensor;
 
     View relativeLayout;
 
     float gain = 2;
-    int i;
-
-    float runningSum = 0f;
 
     // Once per loop, we will update this hsvValues array. The first element (0) will contain the
     // hue, the second element (1) will contain the saturation, and the third element (2) will
@@ -36,7 +34,10 @@ public class ColorSensor {
     final float[] hsvValues = new float[3];
 
     Telemetry telemetry;
+    private String latestColor = "OTHER"; // the latest checked ball color
 
+    private final int SAMPLE_SIZE = 50;
+    private final float CONFIDENCE_THRESHOLD = 0.8f; // when confidence is above 80% its good
     public void Init(HardwareMap hardwareMap, Telemetry tele) {
         telemetry = tele;
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
@@ -51,24 +52,55 @@ public class ColorSensor {
         colorSensor.setGain(gain);
     }
 
-    public String Update() {
-        // calculates the average hue out of 100 latest hue results
-        float recentHue = GetHue();
-        hueHistory.add(recentHue);
-        runningSum += recentHue;
-        i++;
+    public String BallDetermineUpdate() {
+        float hue = GetHue();
+        int ballScore = GetBallScore(hue);
+        float confidence = UpdateConfidenceLevel(ballScore);
+        int confidentResult = ConfidentEnough(confidence);
 
-        if (hueHistory.size() > 100) {
-            float removedHue = hueHistory.remove(0);
-            runningSum -= removedHue;
+        if (confidentResult != 0) {
+            return latestColor;
         }
-        if (i >= 100) {
-            i = 0;
+        return "UNCERTAIN";
+    }
+
+    public int ConfidentEnough(float confidence) {
+        // if confidence level is high enough
+        if (confidence < -CONFIDENCE_THRESHOLD) {
+            telemetry.addData("FULLY CONFIDENT: ", "PURPLE");
+            latestColor = "PURPLE";
+            return -1;
+        } else if (confidence > CONFIDENCE_THRESHOLD) {
+            telemetry.addData("FULLY CONFIDENT: ", "GREEN");
+            latestColor = "GREEN";
+            return 1;
+        } else {
+            telemetry.addData("NOT CONFIDENT YET: ", ":(");
+            // not confident enough
+            return 0;
+        }
+    }
+
+    public float UpdateConfidenceLevel(int ballScore) {
+        colorScores.add(ballScore);
+
+        if (colorScores.size() > SAMPLE_SIZE) {
+            colorScores.remove(0);
         }
 
-        float avg = runningSum / hueHistory.size();
+        // Calculates confidence level of how likely it is to be certain ball
+        if (colorScores.size() == SAMPLE_SIZE) {
+            int total = colorScores.stream().mapToInt(Integer::intValue).sum(); // This fancy ai generated line just calculates the total sum of all numbers in the list
+            float confidenceLevel = total / (float)SAMPLE_SIZE;
+            telemetry.addData("Confidence Level", "%.3f", confidenceLevel);
+            return confidenceLevel;
+        }
+        telemetry.addData("Confidence Level: Collecting data ...", colorScores.size());
+        return 0; // no confidence if not all color data has been collected yet
+    }
 
-        telemetry.addData("Rolling hue average:", "%.2f", avg);
+    public int GetBallScore(float hue) {
+        // Green is 1, Purple is -1, Other is 0
 
         // Tune these color detector results
         // Hue values are from 0-360
@@ -76,18 +108,31 @@ public class ColorSensor {
         final Float GREEN_HUE = 160f;
         final Float PURPLE_HUE = 240f;
 
-        String sensedColor = "NONE";
-        if (GREEN_HUE - COLOR_ACCURACY <= avg && avg <= GREEN_HUE + COLOR_ACCURACY) {
-            sensedColor = "GREEN BALL";
-        } else if (PURPLE_HUE - COLOR_ACCURACY <= avg && avg <= PURPLE_HUE + COLOR_ACCURACY) {
-            sensedColor = "PURPLE BALL";
+        int sensedColor = 0;
+        if (GREEN_HUE - COLOR_ACCURACY <= hue && hue <= GREEN_HUE + COLOR_ACCURACY) {
+            sensedColor = 1;
+        } else if (PURPLE_HUE - COLOR_ACCURACY <= hue && hue <= PURPLE_HUE + COLOR_ACCURACY) {
+            sensedColor = -1;
         }
 
-        telemetry.addData("Sensed ball color: ", sensedColor);
-        telemetry.addData("Update", i);
-
-        telemetry.update();
         return sensedColor;
+    }
+
+
+    public String GetBallColor(int score) {
+        // score should be 0, 1, or -1.
+        // if not that is a big problem
+        if (score == 1) {
+            return "GREEN";
+        } else if (score == -1) {
+            return "PURPLE";
+        } else if (score == 0) {
+            return "OTHER";
+        } else {
+            // Hopefully should never happen
+            telemetry.addData("ERROR:", "GetBallColor() WAS CALLED INCORRECTLY");
+            return "WHAT THE BUST";
+        }
     }
 
     public float GetHue() {

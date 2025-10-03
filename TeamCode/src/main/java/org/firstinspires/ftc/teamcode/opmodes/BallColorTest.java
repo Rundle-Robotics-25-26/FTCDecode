@@ -13,7 +13,7 @@ public class BallColorTest extends OpMode {
 
     @Override
     public void loop() {
-        colorSensor.Update();
+        colorSensor.BallDetermineUpdate();
     }
 
     @Override
