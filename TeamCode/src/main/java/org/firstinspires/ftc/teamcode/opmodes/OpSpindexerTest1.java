@@ -20,16 +20,19 @@ public class OpSpindexerTest1 extends OpMode {
     @Override
     public void loop(){
         if(gamepad1.cross) {
-            spindexer.spindexerToPosOne();
+            spindexer.GoToPos(1);
         }
         else if(gamepad1.circle){
-            spindexer.spindexerToPosTwo();
+            spindexer.GoToPos(2);
         }
         else {
-            spindexer.spindexerToPosThree();
+            spindexer.GoToPos(3);
         }
 
 
-        telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
+        //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
+        telemetry.addData("Current position index", spindexer.currentPosition);
+        telemetry.addData("Current encoded position", spindexer.getMotorPosition());
+        telemetry.update();
     }
 }

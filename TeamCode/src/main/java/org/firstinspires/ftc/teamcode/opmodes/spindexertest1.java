@@ -20,12 +20,16 @@ public class spindexertest1 {
      */
     private DcMotor Spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
-    private int ticksPerRotation = 360; // CHANGE DEPENDING ON ROBOT
-    private double targetPositionMultiple = (double) ticksPerRotation/3;
+    private double ticksPerRotation = 537.6; // CHANGE DEPENDING ON ROBOT
+    private double targetPositionMultiple = ticksPerRotation/3;
     // find positions of all spindexer indexes
     private double positionOne = targetPositionMultiple;
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
+
+    private final double SPEED = 0.1;
+
+    public int currentPosition;
 
     private int[] posStates = {0, 0, 0}; //the array that will store what is in each slot in the spindexer (0-empty, 1-green, 2-purple)
 
@@ -33,6 +37,8 @@ public class spindexertest1 {
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
     }
+
+    public int getMotorPosition() {return Spindexer.getCurrentPosition();}
 
     // initialising the motor with fresh values (resets encoder)
     public void freshInit() {
@@ -58,22 +64,46 @@ public class spindexertest1 {
         return Math.round(positionRatio);
     }
 
+    public void GoToPos(int pos) {
+        if (currentPosition == pos) {
+            // dont do anything else if already at or moving to current position
+            return;
+        }
 
+        currentPosition = pos;
+
+        int targetPosition;
+        if (pos == 1) { targetPosition = (int) Math.round(positionOne); }
+        else if (pos == 2) { targetPosition = (int) Math.round(positionTwo); }
+        else { targetPosition = (int) Math.round(positionThree); }
+
+        if (targetPosition > Spindexer.getCurrentPosition()) {
+            Spindexer.setPower(SPEED);
+            Spindexer.setTargetPosition(targetPosition);
+        } else {
+            Spindexer.setPower(-SPEED);
+            Spindexer.setTargetPosition(targetPosition);
+        }
+
+    }
+
+    /*
     // specific for each position should make a general position
     public void spindexerToPosOne(){
         // gets the nearest spindexer position as compared to its current position
         // find nearest position
         double positionRatio =  Spindexer.getCurrentPosition() / positionOne;
         int targetPosition = (int)((double) Math.round(positionRatio) * positionOne);
+
         if (targetPosition == 0) {
             targetPosition = (int) positionOne;
         }
         if (targetPosition > Spindexer.getCurrentPosition()){
-            Spindexer.setPower(1);
+            Spindexer.setPower(SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
         else {
-            Spindexer.setPower(-1);
+            Spindexer.setPower(-SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
     }
@@ -86,11 +116,11 @@ public class spindexertest1 {
             targetPosition = (int) positionTwo;
         }
         if (targetPosition > Spindexer.getCurrentPosition()){
-            Spindexer.setPower(1);
+            Spindexer.setPower(SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
         else {
-            Spindexer.setPower(-1);
+            Spindexer.setPower(-SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
     }
@@ -103,13 +133,13 @@ public class spindexertest1 {
             targetPosition = (int) positionThree;
         }
         if (targetPosition > Spindexer.getCurrentPosition()){
-            Spindexer.setPower(1);
+            Spindexer.setPower(SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
         else {
-            Spindexer.setPower(-1);
+            Spindexer.setPower(-SPEED);
             Spindexer.setTargetPosition(targetPosition);
         }
     }
-
+    */
 }
