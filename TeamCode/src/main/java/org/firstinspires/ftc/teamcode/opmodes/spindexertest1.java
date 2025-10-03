@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class spindexertest1 {
     // the spindexer is a motor driven 3 chamber ball storage
@@ -41,20 +40,21 @@ public class spindexertest1 {
     public int getMotorPosition() {return Spindexer.getCurrentPosition();}
 
     // initialising the motor with fresh values (resets encoder)
-    public void freshInit() {
-        Spindexer = hardwareMap.get(DcMotor.class, motorName);
-        Spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        Spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    public void freshInit(DcMotor motor) {
+        Spindexer = motor;
+
     }
 
     // init motor with data values in the encoder in theory
+    /*
     public void dataInt(){
         Spindexer = hardwareMap.get(DcMotor.class, motorName);
+
         Spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         Spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
-
+    */
     public long getSpindexerNearest(){
         // find nearest position
         double positionRatio =  Spindexer.getCurrentPosition() / targetPositionMultiple;

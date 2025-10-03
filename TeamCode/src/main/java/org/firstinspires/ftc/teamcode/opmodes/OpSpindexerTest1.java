@@ -1,15 +1,24 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 
+@TeleOp(name="Spindexer test")
 public class OpSpindexerTest1 extends OpMode {
     private final spindexertest1 spindexer = new spindexertest1();
+    DcMotor spindexerMotor;
 
     @Override
     public void init(){
-        spindexer.getMotor("motor2");
-        spindexer.freshInit();
+        spindexerMotor = hardwareMap.get(DcMotor.class, "motor2");
+        spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spindexerMotor.setTargetPosition(0);
+        spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        spindexer.freshInit(spindexerMotor);
     }
 
     @Override
