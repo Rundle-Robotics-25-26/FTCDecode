@@ -28,7 +28,7 @@ public class spindexertest1 {
 
     private final double SPEED = 0.1;
 
-    public int currentPosition;
+    public int currentPosition = 1;
 
     private int[] posStates = {0, 0, 0}; //the array that will store what is in each slot in the spindexer (0-empty, 1-green, 2-purple)
 
