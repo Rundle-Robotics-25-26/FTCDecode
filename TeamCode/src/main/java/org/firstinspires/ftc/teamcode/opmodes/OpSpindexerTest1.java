@@ -23,7 +23,7 @@ public class OpSpindexerTest1 extends OpMode {
 
     @Override
     public void start(){
-        // idk what this does ngl
+        // idk what this does ngl, gg
     }
 
     @Override
