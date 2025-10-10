@@ -21,9 +21,12 @@ public class spindexertest1 {
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     private double ticksPerRotation = 537.6; // CHANGE DEPENDING ON ROBOT
     private double targetPositionMultiple = ticksPerRotation / 3;
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
     private double ticksPerRotation = 1580; // CHANGE DEPENDING ON ROBOT
