@@ -27,11 +27,15 @@ public class MotorSpin extends OpMode {
 
         if(gamepad1.circle){
             //servo.setPosition(0.4);
-            motor.setPower(0.5);
+            motor.setPower(1.0);
         }
         if(gamepad1.cross) {
             //servo.setPosition(0.0);
             motor.setPower(0);
+        }
+        if(gamepad1.square) {
+            //servo.setPosition(0.0);
+            motor.setPower(0.5);
         }
     }
 
