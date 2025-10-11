@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class spindexertest1 {
+public class Spindexer {
     // the spindexer is a motor driven 3 chamber ball storage
     /* this code aims to be a general class that can:
     - get the position of the spindexer - Done
@@ -17,7 +16,7 @@ public class spindexertest1 {
     - have both encoders and timing for knowing the position [optional] - TODO
 
      */
-    private DcMotor Spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
+    private DcMotor spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
     private double ticksPerRotation = 1580;// CHANGE DEPENDING ON ROBOT
     private double targetPositionMultiple = ticksPerRotation / 3;
@@ -39,7 +38,7 @@ public class spindexertest1 {
 
     // initialising the motor with fresh values (resets encoder)
     public void freshInit(DcMotor motor) {
-        Spindexer = motor;
+        spindexer = motor;
 
     }
 
@@ -55,7 +54,7 @@ public class spindexertest1 {
     */
     public long getSpindexerNearest() {
         // find nearest position
-        double positionRatio = Spindexer.getCurrentPosition() / targetPositionMultiple;
+        double positionRatio = spindexer.getCurrentPosition() / targetPositionMultiple;
         if (Math.round(positionRatio) == 0) {
             positionRatio = 1.0;
         }
@@ -63,7 +62,7 @@ public class spindexertest1 {
     }
 
     public void GoToPos(int newPos) {
-        if (currentPosition == newPos || Spindexer.isBusy()) {
+        if (currentPosition == newPos || spindexer.isBusy()) {
             return;
         }
 
@@ -83,15 +82,15 @@ public class spindexertest1 {
     }
 
     private void rotateClockwise() {
-        int targetPosition = Spindexer.getCurrentPosition() + (int)targetPositionMultiple;
-        Spindexer.setPower(SPEED);
-        Spindexer.setTargetPosition(targetPosition);
+        int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
+        spindexer.setPower(SPEED);
+        spindexer.setTargetPosition(targetPosition);
     }
 
     private void rotateCounterclockwise() {
-        int targetPosition = Spindexer.getCurrentPosition() - (int)targetPositionMultiple;
-        Spindexer.setPower(-SPEED);
-        Spindexer.setTargetPosition(targetPosition);
+        int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
+        spindexer.setPower(-SPEED);
+        spindexer.setTargetPosition(targetPosition);
     }
     /*
     // specific for each position should make a general position

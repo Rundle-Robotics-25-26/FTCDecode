@@ -4,10 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Spindexer;
+
 
 @TeleOp(name="Spindexer test")
 public class OpSpindexerTest1 extends OpMode {
-    private final spindexertest1 spindexer = new spindexertest1();
+    private final Spindexer spindexer = new Spindexer();
     DcMotor spindexerMotor;
 
     @Override
