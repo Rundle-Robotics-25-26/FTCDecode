@@ -64,6 +64,10 @@ public class ColorSensor {
         return "UNCERTAIN";
     }
 
+    public void Reset() {
+        colorScores.clear();
+    }
+
     public int ConfidentEnough(float confidence) {
         // if confidence level is high enough
         if (confidence < -CONFIDENCE_THRESHOLD) {

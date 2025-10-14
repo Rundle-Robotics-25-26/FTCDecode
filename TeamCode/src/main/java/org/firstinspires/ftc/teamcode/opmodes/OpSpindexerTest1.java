@@ -14,13 +14,7 @@ public class OpSpindexerTest1 extends OpMode {
 
     @Override
     public void init(){
-        spindexerMotor = hardwareMap.get(DcMotor.class, "motor2");
-        spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spindexerMotor.setTargetPosition(0);
-        spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        spindexer.freshInit(spindexerMotor);
+        spindexer.freshInit(hardwareMap);
     }
 
     @Override
@@ -43,7 +37,9 @@ public class OpSpindexerTest1 extends OpMode {
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);
-        telemetry.addData("Current encoded position", spindexerMotor.getCurrentPosition());
+        if (spindexer.spindexer != null) {
+            telemetry.addData("Current encoded position", spindexer.spindexer.getCurrentPosition());
+        }
         telemetry.update();
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Spindexer {
     // the spindexer is a motor driven 3 chamber ball storage
@@ -16,7 +17,7 @@ public class Spindexer {
     - have both encoders and timing for knowing the position [optional] - TODO
 
      */
-    private DcMotor spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
+    public DcMotor spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
     private double ticksPerRotation = 1580;// CHANGE DEPENDING ON ROBOT
     private double targetPositionMultiple = ticksPerRotation / 3;
@@ -25,21 +26,26 @@ public class Spindexer {
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
 
+    public int positionAtTurret = 1;
+
     private final double SPEED = 0.5;
 
     public int currentPosition = 1;
 
-    private int[] posStates = {0, 0, 0}; //the array that will store what is in each slot in the spindexer (0-empty, 1-green, 2-purple)
-
+    public int[] posStates = {-1, -1, -1}; //the array that will store what is in each slot in the spindexer ( -1 - unknown, 0-empty, 1-green, 2-purple)
+    public int[] positions = {1, 2, 3}; // the first element is the position at the turret
     //the function that would in theory if it works allow any motor to be put in
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
     }
 
     // initialising the motor with fresh values (resets encoder)
-    public void freshInit(DcMotor motor) {
-        spindexer = motor;
-
+    public void freshInit(HardwareMap hardwareMap) {
+        spindexer = hardwareMap.get(DcMotor.class, "motor2");
+        spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spindexer.setTargetPosition(0);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     // init motor with data values in the encoder in theory
@@ -61,8 +67,18 @@ public class Spindexer {
         return Math.round(positionRatio);
     }
 
-    public void GoToPos(int newPos) {
-        if (currentPosition == newPos || spindexer.isBusy()) {
+    public boolean isAtPos(int pos) {
+        if (currentPosition == pos) {
+            if (!spindexer.isBusy()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void GoToPos(int newPos, boolean priority) {
+        // if priority is true then it will not wait for spindexer to stop moving
+        if (!priority && (currentPosition == newPos || spindexer.isBusy())) {
             return;
         }
 
@@ -81,16 +97,32 @@ public class Spindexer {
         currentPosition = newPos;
     }
 
+    public void GoToPos(int newPos) { // if no second parameter default to false
+        GoToPos(newPos, false);
+    }
+
     private void rotateClockwise() {
         int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
+
+        // This shifts all the positions clockwise Example: {1,2,3} -> {3,1,2}
+        int firstPos = positions[0];
+        positions[0] = positions[2];
+        positions[1] = firstPos;
+        positions[2] = positions[1];
     }
 
     private void rotateCounterclockwise() {
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
+
+        // This shifts all the positions counter clockwise Example: {1,2,3} -> {2,3,1}
+        int firstPos = positions[0];
+        positions[0] = positions[1];
+        positions[1] = positions[2];
+        positions[2] = firstPos;
     }
     /*
     // specific for each position should make a general position
