@@ -9,7 +9,6 @@ public class ColorScanning {
 
     private int currentScanPosition = 1; // the position which is being sensed by the color sensor
     private boolean isScanning = false;
-    private boolean isAtPosition = false;
     private final long SCAN_TIME = 500; // How long to scan in ms for ball until we know it's color
 
     private long arriveTime; // The system time in ms when the spindexer reached the position to scan
@@ -42,6 +41,35 @@ public class ColorScanning {
         telemetry.addData("Current spindexer: ", "Pos1: %d, Pos2: %d, Pos3: %d", spindexer.posStates[0], spindexer.posStates[1], spindexer.posStates[2]);
     }
 
+    public void MoveToEmptySlot() {
+        // Always scan the slot and if its a color it switches until it's on an empty slot
+        if (spindexer.spindexer.isBusy()) {
+            //if moving don't do anything
+            return;
+        }
+
+        if (!isScanning) {
+            isScanning = true;
+            arriveTime = System.currentTimeMillis();
+        }
+
+        currentScanPosition = spindexer.positions[0]; // This is the position at the color sensor
+        boolean doneScan = Scanning();
+        if (doneScan) {
+            int positionState = spindexer.posStates[currentScanPosition-1];
+            if (positionState == 1 || positionState == 2) { // if green or purple switch slot
+                telemetry.addData("Status:", "Switching slot...");
+                spindexer.GoToPos(spindexer.getNewClockwisePos());
+            } else {
+                telemetry.addData("Status: ", "STAYING ON EMPTY SLOT");
+            }
+        } else {
+            telemetry.addData("Status:", "COLOR SCANNING...");
+        }
+
+        telemetry.addData("Current spindexer: ", "Pos1: %d, Pos2: %d, Pos3: %d", spindexer.posStates[0], spindexer.posStates[1], spindexer.posStates[2]);
+    }
+
 
     private void HandleState() {
         switch(currentState) {
@@ -62,23 +90,27 @@ public class ColorScanning {
                 break;
         }
     }
-    private void Scanning() {
+    private boolean Scanning() {
+        // return true if done scan
         String colorResult = colorSensor.BallDetermineUpdate(); // "UNCERTAIN", "GREEN" or "PURPLE"
         if (colorResult.equals("GREEN")) { // confident its green so we dont have to wait the full SCAN_TIME
             spindexer.posStates[currentScanPosition-1] = 1;
             DoneScan();
+            return true;
         }
         else if (colorResult.equals("PURPLE")) {
             spindexer.posStates[currentScanPosition-1] = 2;
             DoneScan();
+            return true;
         }
         else if (System.currentTimeMillis() - arriveTime >= SCAN_TIME) {
             // done scan time, there is no ball in slot
             spindexer.posStates[currentScanPosition-1] = 0;
             DoneScan();
+            return true;
         }
         else {
-            telemetry.addData("Status:", "COLOR SCANNING...");
+            return false;
         }
     }
     private void IsMovingDone() {
@@ -118,6 +150,8 @@ public class ColorScanning {
 
     void DoneScan() {
         currentState = ScanState.COMPLETE;
+        isScanning = false;
+        colorSensor.Reset();
     }
 
     public void Reset() {

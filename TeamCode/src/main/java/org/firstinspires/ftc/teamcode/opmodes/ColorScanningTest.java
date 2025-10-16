@@ -27,6 +27,7 @@ public class ColorScanningTest extends OpMode {
         if (gamepad1.circle) {
             colorScanning.Reset();
         }
-        colorScanning.ScanAll();
+        //colorScanning.ScanAll(); // test 1
+        colorScanning.MoveToEmptySlot(); // test 2
     }
 }

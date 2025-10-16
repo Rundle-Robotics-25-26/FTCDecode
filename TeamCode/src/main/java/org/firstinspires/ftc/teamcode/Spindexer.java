@@ -33,7 +33,7 @@ public class Spindexer {
     public int currentPosition = 1;
 
     public int[] posStates = {-1, -1, -1}; //the array that will store what is in each slot in the spindexer ( -1 - unknown, 0-empty, 1-green, 2-purple)
-    public int[] positions = {1, 2, 3}; // the first element is the position at the turret
+    public int[] positions = {1, 2, 3}; // the first element is the position at the turret. The absolute positions instead of relativ
     //the function that would in theory if it works allow any motor to be put in
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
@@ -82,8 +82,8 @@ public class Spindexer {
             return;
         }
 
-        int newClockwisePos = (currentPosition % 3) + 1;           // 1->2, 2->3, 3->1
-        int newCounterClockwisePos = ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
+        int newClockwisePos = getNewClockwisePos();
+        int newCounterClockwisePos = getNewCounterClockwisePos();
 
         if (newPos == newClockwisePos) {
             rotateClockwise();
@@ -100,8 +100,13 @@ public class Spindexer {
     public void GoToPos(int newPos) { // if no second parameter default to false
         GoToPos(newPos, false);
     }
-
-    private void rotateClockwise() {
+    public int getNewClockwisePos() {
+        return (currentPosition % 3) + 1; // 1->2, 2->3, 3->1
+    }
+    public int getNewCounterClockwisePos() {
+        return ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
+    }
+    public void rotateClockwise() {
         int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
@@ -113,7 +118,7 @@ public class Spindexer {
         positions[2] = positions[1];
     }
 
-    private void rotateCounterclockwise() {
+    public void rotateCounterclockwise() {
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
