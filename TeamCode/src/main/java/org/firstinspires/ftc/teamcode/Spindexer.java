@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class spindexertest1 {
+public class Spindexer {
     // the spindexer is a motor driven 3 chamber ball storage
     /* this code aims to be a general class that can:
     - get the position of the spindexer - Done
@@ -17,7 +17,7 @@ public class spindexertest1 {
     - have both encoders and timing for knowing the position [optional] - TODO
 
      */
-    private DcMotor Spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
+    public DcMotor spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
     private double ticksPerRotation = 1580;// CHANGE DEPENDING ON ROBOT
     private double targetPositionMultiple = ticksPerRotation / 3;
@@ -26,21 +26,26 @@ public class spindexertest1 {
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
 
+    public int positionAtTurret = 1;
+
     private final double SPEED = 0.5;
 
     public int currentPosition = 1;
 
-    private int[] posStates = {0, 0, 0}; //the array that will store what is in each slot in the spindexer (0-empty, 1-green, 2-purple)
-
+    public int[] posStates = {-1, -1, -1}; //the array that will store what is in each slot in the spindexer ( -1 - unknown, 0-empty, 1-green, 2-purple)
+    public int[] positions = {1, 2, 3}; // the first element is the position at the turret. The absolute positions instead of relativ
     //the function that would in theory if it works allow any motor to be put in
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
     }
 
     // initialising the motor with fresh values (resets encoder)
-    public void freshInit(DcMotor motor) {
-        Spindexer = motor;
-
+    public void freshInit(HardwareMap hardwareMap) {
+        spindexer = hardwareMap.get(DcMotor.class, "motor2");
+        spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        spindexer.setTargetPosition(0);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     // init motor with data values in the encoder in theory
@@ -55,20 +60,30 @@ public class spindexertest1 {
     */
     public long getSpindexerNearest() {
         // find nearest position
-        double positionRatio = Spindexer.getCurrentPosition() / targetPositionMultiple;
+        double positionRatio = spindexer.getCurrentPosition() / targetPositionMultiple;
         if (Math.round(positionRatio) == 0) {
             positionRatio = 1.0;
         }
         return Math.round(positionRatio);
     }
 
-    public void GoToPos(int newPos) {
-        if (currentPosition == newPos || Spindexer.isBusy()) {
+    public boolean isAtPos(int pos) {
+        if (currentPosition == pos) {
+            if (!spindexer.isBusy()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void GoToPos(int newPos, boolean priority) {
+        // if priority is true then it will not wait for spindexer to stop moving
+        if (!priority && (currentPosition == newPos || spindexer.isBusy())) {
             return;
         }
 
-        int newClockwisePos = (currentPosition % 3) + 1;           // 1->2, 2->3, 3->1
-        int newCounterClockwisePos = ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
+        int newClockwisePos = getNewClockwisePos();
+        int newCounterClockwisePos = getNewCounterClockwisePos();
 
         if (newPos == newClockwisePos) {
             rotateClockwise();
@@ -82,16 +97,37 @@ public class spindexertest1 {
         currentPosition = newPos;
     }
 
-    private void rotateClockwise() {
-        int targetPosition = Spindexer.getCurrentPosition() + (int)targetPositionMultiple;
-        Spindexer.setPower(SPEED);
-        Spindexer.setTargetPosition(targetPosition);
+    public void GoToPos(int newPos) { // if no second parameter default to false
+        GoToPos(newPos, false);
+    }
+    public int getNewClockwisePos() {
+        return (currentPosition % 3) + 1; // 1->2, 2->3, 3->1
+    }
+    public int getNewCounterClockwisePos() {
+        return ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
+    }
+    public void rotateClockwise() {
+        int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
+        spindexer.setPower(SPEED);
+        spindexer.setTargetPosition(targetPosition);
+
+        // This shifts all the positions clockwise Example: {1,2,3} -> {3,1,2}
+        int firstPos = positions[0];
+        positions[0] = positions[2];
+        positions[1] = firstPos;
+        positions[2] = positions[1];
     }
 
-    private void rotateCounterclockwise() {
-        int targetPosition = Spindexer.getCurrentPosition() - (int)targetPositionMultiple;
-        Spindexer.setPower(-SPEED);
-        Spindexer.setTargetPosition(targetPosition);
+    public void rotateCounterclockwise() {
+        int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
+        spindexer.setPower(-SPEED);
+        spindexer.setTargetPosition(targetPosition);
+
+        // This shifts all the positions counter clockwise Example: {1,2,3} -> {2,3,1}
+        int firstPos = positions[0];
+        positions[0] = positions[1];
+        positions[1] = positions[2];
+        positions[2] = firstPos;
     }
     /*
     // specific for each position should make a general position

@@ -4,21 +4,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Spindexer;
+
 
 @TeleOp(name="Spindexer test")
 public class OpSpindexerTest1 extends OpMode {
-    private final spindexertest1 spindexer = new spindexertest1();
+    private final Spindexer spindexer = new Spindexer();
     DcMotor spindexerMotor;
 
     @Override
     public void init(){
-        spindexerMotor = hardwareMap.get(DcMotor.class, "motor2");
-        spindexerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spindexerMotor.setTargetPosition(0);
-        spindexerMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spindexerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        spindexer.freshInit(spindexerMotor);
+        spindexer.freshInit(hardwareMap);
     }
 
     @Override
@@ -41,7 +37,9 @@ public class OpSpindexerTest1 extends OpMode {
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);
-        telemetry.addData("Current encoded position", spindexerMotor.getCurrentPosition());
+        if (spindexer.spindexer != null) {
+            telemetry.addData("Current encoded position", spindexer.spindexer.getCurrentPosition());
+        }
         telemetry.update();
     }
 }
