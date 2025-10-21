@@ -21,7 +21,7 @@ public class FieldCentricDrive extends LinearOpMode {
     @Override
     public void runOpMode() {
         turret = hardwareMap.get(DcMotor.class, "turret");
-        /*
+
         DcMotor leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         DcMotor leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         DcMotor rightFront = hardwareMap.get(DcMotor.class, "rightFront");
@@ -34,17 +34,16 @@ public class FieldCentricDrive extends LinearOpMode {
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
         ));
         imu.initialize(parameters);
-*/
+
         waitForStart();
 
         while (opModeIsActive()) {
             TurretControl();
-            telemetry.update();
-            /*
+
             double lx = gamepad1.left_stick_x;
             double ly = -gamepad1.left_stick_y;
             double rx = gamepad1.right_stick_x;
@@ -66,8 +65,8 @@ public class FieldCentricDrive extends LinearOpMode {
             leftBack.setPower(((adjustedLy - adjustedLx + rx) / max) * drivePower);
             rightFront.setPower(((adjustedLy - adjustedLx - rx) / max) * drivePower);
             rightBack.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
-            */
 
+            telemetry.update();
         }
     }
 
