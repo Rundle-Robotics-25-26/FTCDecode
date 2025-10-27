@@ -27,8 +27,8 @@ public class FieldCentricDrive extends LinearOpMode {
         DcMotor rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         DcMotor rightBack = hardwareMap.get(DcMotor.class, "rightBack");
 
-        leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftBack.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
 
         Deadline gamepadRateLimit = new Deadline(500, TimeUnit.MILLISECONDS);
 

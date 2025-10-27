@@ -27,12 +27,14 @@ public class Intake extends OpMode {
 
     @Override
     public void loop() {
+        in(0);
         if(gamepad1.right_bumper){
             in(1);
         }
 
         if(gamepad1.left_bumper) {
-            in(0);
+            in(-1);
         }
+
     }
 }

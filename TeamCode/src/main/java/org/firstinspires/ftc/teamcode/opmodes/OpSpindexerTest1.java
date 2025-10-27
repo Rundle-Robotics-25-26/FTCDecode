@@ -28,11 +28,10 @@ public class OpSpindexerTest1 extends OpMode {
             spindexer.GoToPos(1);
         }
         else if(gamepad1.circle){
-            spindexer.GoToPos(2);
-        }
-
-        if (!spindexer.spindexer.isBusy()) {
             spindexer.rotateClockwise();
+        }
+        if (!spindexer.spindexer.isBusy()) {
+
         }
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());

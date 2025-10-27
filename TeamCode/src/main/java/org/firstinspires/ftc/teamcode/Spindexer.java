@@ -107,6 +107,9 @@ public class Spindexer {
         return ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
     }
     public void rotateClockwise() {
+        if (spindexer.isBusy()) {
+            return;
+        }
         int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
@@ -119,6 +122,9 @@ public class Spindexer {
     }
 
     public void rotateCounterclockwise() {
+        if (spindexer.isBusy()) {
+            return;
+        }
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
