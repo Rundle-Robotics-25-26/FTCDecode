@@ -22,6 +22,21 @@ public class IndexerTest extends OpMode {
 
     @Override
     public void loop() {
-        indexer.Update(gamepad1.cross);
+        int armMovement = 0;
+        if (gamepad1.left_bumper) {
+            armMovement = 1;
+        }
+        if (gamepad1.left_trigger > 0) {
+            armMovement = -1;
+        }
+
+        int baseMovement = 0;
+        if (gamepad1.right_bumper) {
+            baseMovement = 1;
+        }
+        if (gamepad1.right_trigger > 0) {
+            baseMovement = -1;
+        }
+        indexer.TestUpdate(armMovement, baseMovement);
     }
 }
