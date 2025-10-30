@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -25,20 +25,21 @@ public class MotorSpin extends OpMode {
     @Override
     public void loop() {
 
-        if(gamepad1.circle){
+        if(gamepad1.square){
             servo.setPosition(0.0);
             //motor.setPower(1.0);
         }
         if(gamepad1.cross) {
-            servo.setPosition(0.4);
+            servo.setPosition(0.2);
             //motor.setPower(0);
         }
-        if(gamepad1.square) {
+        //------------------
+        if(gamepad1.circle) {
             servo1.setPosition(0.0);
             //motor.setPower(0.5);
         }
         if(gamepad1.triangle) {
-            servo1.setPosition(0.4);
+            servo1.setPosition(0.2);
             //motor.setPower(0.5);
         }
     }
