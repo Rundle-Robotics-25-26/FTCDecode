@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.SimpleTurret;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
@@ -19,6 +20,8 @@ public class Teleop extends OpMode {
 
     private final Spindexer spindexer = new Spindexer();
     private final SimpleTurret simpleTurret = new SimpleTurret();
+
+    private final Indexer indexer = new Indexer();
 
 
     @Override
@@ -49,10 +52,13 @@ public class Teleop extends OpMode {
         spindexer.freshInit(hardwareMap);
 
         // ==== Simple turret setup ====
-        simpleTurret.Init(hardwareMap);
+        //simpleTurret.Init(hardwareMap);
 
         // ==== Shooter setup ====
         shooter = hardwareMap.get(DcMotor.class, "shooter");
+
+        // ==== Indexer setup ====
+        indexer.Init(hardwareMap, telemetry);
     }
 
     @Override
@@ -102,6 +108,9 @@ public class Teleop extends OpMode {
         } else {
             pressedTriangle = false;
         }
+
+        // ==== Indexer ====
+        indexer.Update(gamepad1.circle);
 
         telemetry.update();
     }
