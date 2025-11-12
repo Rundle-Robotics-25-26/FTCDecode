@@ -33,7 +33,9 @@ public class Teleop extends OpMode {
         frontRight = hardwareMap.get(DcMotor.class, "rf");
         backRight = hardwareMap.get(DcMotor.class, "rr");
 
+
         spinner = hardwareMap.get(DcMotor.class, "motor2");
+
 
         // Set motor directions (adjust based on your robot's configuration)
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
