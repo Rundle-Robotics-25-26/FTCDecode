@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.RobotFunctions; // ADD THIS IMPORT
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp
+//@TeleOp
 public class testTeleOP extends OpMode {
     private Follower follower;
     public static Pose startingPose; //See ExampleAuto to understand how to use this

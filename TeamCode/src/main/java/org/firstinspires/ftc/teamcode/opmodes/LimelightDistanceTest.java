@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Limelight;
 
-@Autonomous(name = "Limelight Distance Test")
+//@Autonomous(name = "Limelight Distance Test")
 public class LimelightDistanceTest extends OpMode {
     private Limelight limelight = new Limelight();
     private LLResult latestResult;

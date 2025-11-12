@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "intake")
+//@TeleOp(name = "intake")
 public class Intake extends OpMode {
 
     CRServo LeftServo;

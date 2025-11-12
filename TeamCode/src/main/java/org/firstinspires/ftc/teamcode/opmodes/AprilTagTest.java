@@ -7,7 +7,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 
 import org.firstinspires.ftc.teamcode.Limelight;
 
-@Autonomous(name = "April Tag Test")
+//@Autonomous(name = "April Tag Test")
 public class AprilTagTest extends OpMode {
     private final Limelight limelight = new Limelight();
     private LLResult latestResult = null;

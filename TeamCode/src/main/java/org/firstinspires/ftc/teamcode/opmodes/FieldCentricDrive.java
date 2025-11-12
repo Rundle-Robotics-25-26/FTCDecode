@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "Field Centric Mecanum Drive")
+//@TeleOp(name = "Field Centric Mecanum Drive")
 public class FieldCentricDrive extends LinearOpMode {
 
     DcMotor turret;
