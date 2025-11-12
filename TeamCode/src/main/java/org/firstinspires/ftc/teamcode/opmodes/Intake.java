@@ -14,6 +14,8 @@ public class Intake extends OpMode {
     CRServo LeftServo;
     CRServo RightServo;
 
+
+
     @Override
     public void init() {
         LeftServo = hardwareMap.get(CRServo.class, "LeftServo");
