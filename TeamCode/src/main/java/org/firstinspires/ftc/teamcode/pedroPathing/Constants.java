@@ -28,7 +28,10 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
         .mass(10.4)
         .forwardZeroPowerAcceleration(-34.18707208137649)
-        .lateralZeroPowerAcceleration(-73.21419897528656);
+        .lateralZeroPowerAcceleration(-73.21419897528656)
+        .useSecondaryTranslationalPIDF(false)
+        .useSecondaryHeadingPIDF(false)
+        .useSecondaryDrivePIDF(false);
 
 
     public static PinpointConstants localizerConstants = new PinpointConstants()

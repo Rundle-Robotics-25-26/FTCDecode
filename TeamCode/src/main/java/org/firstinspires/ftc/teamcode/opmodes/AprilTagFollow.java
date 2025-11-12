@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.Limelight;
 
 import java.util.List;
 
-@Autonomous(name="April Tag Following")
+//@Autonomous(name="April Tag Following")
 public class AprilTagFollow extends OpMode {
     private final Limelight limelight = new Limelight();
     private LLResult latestResult = null;

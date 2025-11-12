@@ -9,7 +9,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-@Autonomous(name = "Test Auto", group = "Auto")
+//@Autonomous(name = "Test Auto", group = "Auto")
 public class testAuto extends OpMode {
 
     private Follower follower;

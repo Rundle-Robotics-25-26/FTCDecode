@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.ColorScanning;
 import org.firstinspires.ftc.teamcode.ColorSensor;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
-@TeleOp(name="Color scan test")
+//@TeleOp(name="Color scan test")
 public class ColorScanningTest extends OpMode {
     // this is just a test to see how fast we can scan all slots in spindexer
     // tune how much time needed to scan a ball
