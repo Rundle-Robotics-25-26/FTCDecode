@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.ColorSensor;
 import org.firstinspires.ftc.teamcode.Limelight;
 
-//@TeleOp(name="Color sensing test")
+@TeleOp(name="Color sensing test")
 public class BallColorTest extends OpMode {
     private final ColorSensor colorSensor = new ColorSensor();
 

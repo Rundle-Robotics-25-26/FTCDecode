@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
 
-//@TeleOp(name="Spindexer test")
+@TeleOp(name="Spindexer test")
 public class OpSpindexerTest1 extends OpMode {
     private final Spindexer spindexer = new Spindexer();
     DcMotor spindexerMotor;

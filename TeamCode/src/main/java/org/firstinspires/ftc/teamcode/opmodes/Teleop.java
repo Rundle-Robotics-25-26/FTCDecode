@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Indexer;
 //import org.firstinspires.ftc.teamcode.SimpleTurret;
+import org.firstinspires.ftc.teamcode.SimpleTurret;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
 @TeleOp(name = "Teleop", group = "Drive")
@@ -20,7 +21,7 @@ public class Teleop extends OpMode {
     private double currentShooterPower = 0.0;
 
     private final Spindexer spindexer = new Spindexer();
-    //private final SimpleTurret simpleTurret = new SimpleTurret();
+    private final SimpleTurret simpleTurret = new SimpleTurret();
 
     private final Indexer indexer = new Indexer();
 
@@ -62,7 +63,7 @@ public class Teleop extends OpMode {
         spindexer.freshInit(hardwareMap);
 
         // ==== Simple turret setup ====
-        //simpleTurret.Init(hardwareMap);
+        simpleTurret.Init(hardwareMap);
 
         // ==== Shooter setup ====
         shooter = hardwareMap.get(DcMotor.class, "shooter");
@@ -108,8 +109,8 @@ public class Teleop extends OpMode {
         telemetry.addData("Spinner Busy", spinner.isBusy());
 
         // ==== Simple turret ====
-        //simpleTurret.TurretControl(gamepad1.left_trigger, gamepad1.right_trigger);
-        //telemetry.addData("Current turret position: ", simpleTurret.turret.getCurrentPosition());
+        simpleTurret.TurretControl(gamepad1.left_trigger, gamepad1.right_trigger);
+        telemetry.addData("Current turret position: ", simpleTurret.turret.getCurrentPosition());
 
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power

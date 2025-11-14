@@ -2,6 +2,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import android.app.Activity;
@@ -9,7 +10,7 @@ import android.graphics.Color;
 import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -37,6 +38,8 @@ public class ColorSensor {
     private String latestColor = "OTHER"; // the latest checked ball color
 
     private final int SAMPLE_SIZE = 50;
+
+    TelemetryManager telemetryM;
     private final float CONFIDENCE_THRESHOLD = 0.8f; // when confidence is above 80% its good
     public void Init(HardwareMap hardwareMap, Telemetry tele) {
         telemetry = tele;
@@ -53,6 +56,8 @@ public class ColorSensor {
     }
 
     public String BallDetermineUpdate() {
+        telemetryM.debug("Hello panels telemetry works!");
+        telemetryM.update();
         float hue = GetHue();
         int ballScore = GetBallScore(hue);
         float confidence = UpdateConfidenceLevel(ballScore);
