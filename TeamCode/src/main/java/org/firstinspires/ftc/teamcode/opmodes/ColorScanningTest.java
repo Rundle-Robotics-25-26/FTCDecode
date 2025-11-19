@@ -17,7 +17,7 @@ public class ColorScanningTest extends OpMode {
     @Override
     public void init() {
         colorSensor.Init(hardwareMap, telemetry);
-        spindexer.freshInit(hardwareMap);
+        spindexer.dataInit(hardwareMap);
 
         colorScanning.Init(colorSensor, spindexer, telemetry); // color scanning requires color sensor and spindexer
     }
@@ -29,5 +29,6 @@ public class ColorScanningTest extends OpMode {
         }
         //colorScanning.ScanAll(); // test 1
         colorScanning.MoveToEmptySlot(); // test 2
+        telemetry.update();
     }
 }

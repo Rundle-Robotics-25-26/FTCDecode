@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Indexer;
 
-@TeleOp(name = "Indexer test")
+@TeleOp(name = "Indexer test", group = "Tests")
 public class IndexerTest extends OpMode {
 
     private final Indexer indexer = new Indexer();

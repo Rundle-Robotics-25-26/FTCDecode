@@ -6,28 +6,15 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class ColorScanning {
     private ColorSensor colorSensor;
     private Spindexer spindexer;
-
-    private int currentScanPosition = 1; // the position which is being sensed by the color sensor
-    private boolean isScanning = false;
-    private final long SCAN_TIME = 500; // How long to scan in ms for ball until we know it's color
-
-    private long arriveTime; // The system time in ms when the spindexer reached the position to scan
+    /*
     private enum ScanState {
         START, MOVING, SCANNING, COMPLETE
     }
     private ScanState currentState = ScanState.START;
+    */
 
     private Telemetry telemetry;
 
-    /*
-    This script gets the color ball in each slot, either GREEN, PURPLE or NONE
-
-    The procedure:
-    - All slots are unknown, move to position one
-    - When at position: starts scanning position for SCAN_TIME miliseconds
-    - Get the predicted colorResult and set it as the result
-    - Move to next slot and repeat process till all balls are scanned
-     */
 
     public void Init(ColorSensor sensor, Spindexer spin, Telemetry tele) {
         telemetry = tele;
@@ -37,39 +24,37 @@ public class ColorScanning {
 
     public void ScanAll() {
         // Scan any unknown slots, DONT CALL WHEN SOMETHING ELSE IS USING SPINDEXER
-        HandleState();
+        //HandleState();
         telemetry.addData("Current spindexer: ", "Pos1: %d, Pos2: %d, Pos3: %d", spindexer.posStates[0], spindexer.posStates[1], spindexer.posStates[2]);
     }
 
     public void MoveToEmptySlot() {
-        // Always scan the slot and if its a color it switches until it's on an empty slot
+        // Always scan the slot and if it sees a ball it rotates clockwise unless all slots are full
+        telemetry.addData("Current Spindexer position: ", spindexer.currentPosition);
+
         if (spindexer.spindexer.isBusy()) {
+            telemetry.addData("Status:", "Rotating slot...");
             //if moving don't do anything
             return;
         }
 
-        if (!isScanning) {
-            isScanning = true;
-            arriveTime = System.currentTimeMillis();
+        if (spindexer.isSpindexerFull()) {
+            telemetry.addData("Status: ", "Spindexer is full!");
         }
 
-        currentScanPosition = spindexer.positions[0]; // This is the position at the color sensor
-        boolean doneScan = Scanning();
-        if (doneScan) {
-            int positionState = spindexer.posStates[currentScanPosition-1];
-            if (positionState == 1 || positionState == 2) { // if green or purple switch slot
-                telemetry.addData("Status:", "Switching slot...");
-                spindexer.GoToPos(spindexer.getNewClockwisePos());
-            } else {
-                telemetry.addData("Status: ", "STAYING ON EMPTY SLOT");
-            }
+        String currentColor = colorSensor.BallDetermineUpdate();
+
+        if (currentColor.equals("GREEN") || currentColor.equals("PURPLE")) {
+            spindexer.updateCurrentSlotState(currentColor);
+            colorSensor.Reset(); // need to do this everytime switch slot
+            spindexer.rotateEmptySlot();
         } else {
-            telemetry.addData("Status:", "COLOR SCANNING...");
+            telemetry.addData("Status:", "Unknown color value");
         }
-
-        telemetry.addData("Current spindexer: ", "Pos1: %d, Pos2: %d, Pos3: %d", spindexer.posStates[0], spindexer.posStates[1], spindexer.posStates[2]);
     }
 
+    //idk why i made it like this, too complicated
+    /*
 
     private void HandleState() {
         switch(currentState) {
@@ -153,10 +138,12 @@ public class ColorScanning {
         isScanning = false;
         colorSensor.Reset();
     }
-
+    */
+    /*
     public void Reset() {
         spindexer.posStates = new int[]{-1, -1, -1};
         currentState = ScanState.START;
         colorSensor.Reset();
     }
+    */
 }

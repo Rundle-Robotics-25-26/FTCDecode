@@ -14,7 +14,7 @@ public class OpSpindexerTest1 extends OpMode {
 
     @Override
     public void init(){
-        spindexer.freshInit(hardwareMap);
+        spindexer.dataInit(hardwareMap);
     }
 
     @Override

@@ -39,8 +39,8 @@ public class ColorSensor {
 
     private final int SAMPLE_SIZE = 50;
 
-    TelemetryManager telemetryM;
-    private final float CONFIDENCE_THRESHOLD = 0.8f; // when confidence is above 80% its good
+    private final float CONFIDENCE_THRESHOLD = 0.6f; // when confidence is above 80% its good
+
     public void Init(HardwareMap hardwareMap, Telemetry tele) {
         telemetry = tele;
         int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
@@ -55,9 +55,7 @@ public class ColorSensor {
         colorSensor.setGain(gain);
     }
 
-    public String BallDetermineUpdate() {
-        telemetryM.debug("Hello panels telemetry works!");
-        telemetryM.update();
+    public String BallDetermineUpdate() { // Returns either "PURPLE", "GREEN" or "UNCERTAIN"
         float hue = GetHue();
         int ballScore = GetBallScore(hue);
         float confidence = UpdateConfidenceLevel(ballScore);

@@ -20,8 +20,10 @@ public class Indexer {
     // FIND THESE VALUES WITH THE TEST UPDATE
     final double ARM_START = 0.1317;
     final double ARM_INDEX = 0.4967;
+    final double ARM_SPINDEX = 0.3; // (NEED TUNING) THE POSITION THE INDEXER SHOULD BE AT WHEN SWITCHING SPINDEXER SLOTS
     final double BASE_START = 0.13;
     final double BASE_INDEX = 0.3961;
+    final double BASE_SPINDEX = 0.3; // NEED TUNING as well
 
     // New movement system variables
     private enum State { IDLE, IN_SEQUENCE, WAITING }

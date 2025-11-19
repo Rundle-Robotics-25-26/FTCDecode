@@ -26,14 +26,13 @@ public class Spindexer {
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
 
-    public int positionAtTurret = 1;
-
     private final double SPEED = 0.5;
 
     public int currentPosition = 1;
 
+    // CHANGE THIS IF PRELOADING
     public int[] posStates = {-1, -1, -1}; //the array that will store what is in each slot in the spindexer ( -1 - unknown, 0-empty, 1-green, 2-purple)
-    public int[] positions = {1, 2, 3}; // the first element is the position at the turret. The absolute positions instead of relativ
+
     //the function that would in theory if it works allow any motor to be put in
     public void getMotor(String nameOfMotor) {
         motorName = nameOfMotor;
@@ -49,15 +48,13 @@ public class Spindexer {
     }
 
     // init motor with data values in the encoder in theory
-    /*
-    public void dataInt(){
-        Spindexer = hardwareMap.get(DcMotor.class, motorName);
-
-        Spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        Spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    public void dataInit(HardwareMap hardwareMap){
+        spindexer = hardwareMap.get(DcMotor.class, "motor2");
+        spindexer.setTargetPosition(0);
+        spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
-    */
+    /*
     public long getSpindexerNearest() {
         // find nearest position
         double positionRatio = spindexer.getCurrentPosition() / targetPositionMultiple;
@@ -66,6 +63,8 @@ public class Spindexer {
         }
         return Math.round(positionRatio);
     }
+    */
+
 
     public boolean isAtPos(int pos) {
         if (currentPosition == pos) {
@@ -77,7 +76,7 @@ public class Spindexer {
     }
 
     public void GoToPos(int newPos, boolean priority) {
-        // if priority is true then it will not wait for spindexer to stop moving
+        // if priority is true then it will not wait for spindexer to stop moving (DONT DO THIS)
         if (!priority && (currentPosition == newPos || spindexer.isBusy())) {
             return;
         }
@@ -93,8 +92,6 @@ public class Spindexer {
             // Should never happen if positions are 1,2,3
             return;
         }
-
-        currentPosition = newPos;
     }
 
     public void GoToPos(int newPos) { // if no second parameter default to false
@@ -114,11 +111,15 @@ public class Spindexer {
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
 
+        currentPosition = getNewClockwisePos();
+
+        /*
         // This shifts all the positions clockwise Example: {1,2,3} -> {3,1,2}
         int firstPos = positions[0];
         positions[0] = positions[2];
         positions[1] = firstPos;
         positions[2] = positions[1];
+        */
     }
 
     public void rotateCounterclockwise() {
@@ -129,11 +130,42 @@ public class Spindexer {
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
 
+        currentPosition = getNewCounterClockwisePos();
+
+        /*
         // This shifts all the positions counter clockwise Example: {1,2,3} -> {2,3,1}
         int firstPos = positions[0];
         positions[0] = positions[1];
         positions[1] = positions[2];
         positions[2] = firstPos;
+        */
+    }
+
+    public void updateCurrentSlotState(String state) {
+        if (state.equals("GREEN")) {
+            posStates[currentPosition - 1] = 1;
+        } else if (state.equals("PURPLE")) {
+            posStates[currentPosition - 1] = 2;
+        } else {
+            posStates[currentPosition - 1] = -1;
+        }
+    }
+
+    public boolean isSpindexerFull() {
+        for (int i = 0; i < posStates.length; i++) {
+            if (posStates[i] <= 0) { // if not purple or green
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void rotateEmptySlot() {
+        for (int i = 0; i < posStates.length; i++) {
+            if (posStates[i] <= 0) { // if not purple or green
+                GoToPos(i+1);
+            }
+        }
     }
     /*
     // specific for each position should make a general position
