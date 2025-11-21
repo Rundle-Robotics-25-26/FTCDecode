@@ -8,30 +8,26 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class RobotFunctions {
     private TurretController turretController;
-    private ShooterController shooterController; // ADD THIS
     private DcMotorEx turretMotor;
     private Follower follower;
 
-    // Turret motor specs - adjust based on your motor
-    private final double TURRET_TICKS_PER_REVOLUTION = 537.6; // Gobilda 312 RPM motor
-
-    // Track current turret angle for continuous rotation
+    // Track current turret angle for reference
     private double currentTurretAngle = 0;
 
     //---------------------------TURRET-------------------------------------------------------------
     public void initTurret(HardwareMap hardwareMap, Follower follower) {
         this.follower = follower;
-        turretController = new TurretController(TURRET_TICKS_PER_REVOLUTION);
+        turretController = new TurretController();
 
         // Initialize turret motor
-        turretMotor = hardwareMap.get(DcMotorEx.class, "turretMotor");
+        turretMotor = hardwareMap.get(DcMotorEx.class, "turret");
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setTargetPosition(0);
-        turretMotor.setPower(0.3); // Adjust power as needed
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setPower(0.3);
 
-        currentTurretAngle = 0; // Reset tracked angle
+        currentTurretAngle = 0;
     }
 
     /**
@@ -39,67 +35,55 @@ public class RobotFunctions {
      */
     public void updateTurret() {
         Pose currentRobotPose = follower.getPose();
-
-        // Convert current encoder position to angle for continuous rotation
-        currentTurretAngle = turretMotor.getCurrentPosition() / (TURRET_TICKS_PER_REVOLUTION / (2 * Math.PI));
-
-        // Calculate new target with continuous rotation
-        int targetPosition = turretController.calculateTurretPosition(
-                currentRobotPose, currentTurretAngle);
+        int targetPosition = turretController.calculateTurretPosition(currentRobotPose);
 
         turretMotor.setTargetPosition(targetPosition);
 
-        // Optional: Only enable power when not at target to save battery
+        // Only enable power when not at target to save battery
         if (Math.abs(turretMotor.getCurrentPosition() - targetPosition) > 10) {
             turretMotor.setPower(0.3);
         } else {
-            turretMotor.setPower(0.1); // Hold position with lower power
+            turretMotor.setPower(0.1);
         }
 
         // Update our tracked angle
-        currentTurretAngle = targetPosition / (TURRET_TICKS_PER_REVOLUTION / (2 * Math.PI));
+        currentTurretAngle = targetPosition * (Math.PI / 2) / 470.0;
     }
-
-    //---------------------------SHOOTER------------------------------------------------------------
-    public void initShooter(HardwareMap hardwareMap, Follower follower) {
-        shooterController = new ShooterController();
-        shooterController.initShooter(hardwareMap, follower);
-    }
-
-    public void updateShooter(boolean triggerHeld) {
-        shooterController.setShooterPower(triggerHeld);
-    }
-
-    public double getCurrentShooterPower() {
-        return shooterController.getCurrentPower();
-    }
-
-    public double getDistanceToGoal() {
-        return shooterController.getDistanceToGoal();
-    }
-    //----------------------------------------------------------------------------------------------
 
     /**
      * Manually override turret position (for testing)
      */
-    public void setTurretManualPosition(double angleRadians) {
-        int position = (int)(angleRadians * (TURRET_TICKS_PER_REVOLUTION / (2 * Math.PI)));
-        turretMotor.setTargetPosition(position);
-        currentTurretAngle = angleRadians; // Update tracked angle
+    public void setTurretManualPosition(int targetTicks) {
+        turretMotor.setTargetPosition(targetTicks);
+        currentTurretAngle = targetTicks * (Math.PI / 2) / 470.0;
     }
 
     /**
      * Get current turret angle in radians
      */
     public double getTurretAngle() {
-        return turretMotor.getCurrentPosition() / (TURRET_TICKS_PER_REVOLUTION / (2 * Math.PI));
+        return turretMotor.getCurrentPosition() * (Math.PI / 2) / 470.0;
     }
 
     /**
-     * Get current turret angle in continuous system (-∞ to +∞)
+     * Get current turret angle in continuous system
      */
     public double getContinuousTurretAngle() {
         return currentTurretAngle;
+    }
+
+    /**
+     * Get current turret position in ticks
+     */
+    public int getTurretTicks() {
+        return turretMotor.getCurrentPosition();
+    }
+
+    /**
+     * Get current turret angle in degrees
+     */
+    public double getTurretAngleDegrees() {
+        return getTurretTicks() * 90.0 / 470.0;
     }
 
     /**
@@ -107,9 +91,10 @@ public class RobotFunctions {
      */
     public void resetTurret() {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         currentTurretAngle = 0;
-        turretMotor.setTargetPosition(0);
     }
 
     /**
@@ -118,5 +103,24 @@ public class RobotFunctions {
     public boolean isGoalInRange() {
         Pose currentRobotPose = follower.getPose();
         return turretController.isGoalInRange(currentRobotPose);
+    }
+
+    /**
+     * Get turret limits for reference
+     */
+    public int getMaxRightTicks() {
+        return turretController.getMaxRightTicks();
+    }
+
+    public int getMaxLeftTicks() {
+        return turretController.getMaxLeftTicks();
+    }
+
+    /**
+     * Get debug info about turret calculation
+     */
+    public String getTurretDebugInfo() {
+        Pose currentRobotPose = follower.getPose();
+        return turretController.getDebugInfo(currentRobotPose);
     }
 }

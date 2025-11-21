@@ -4,79 +4,43 @@ import com.pedropathing.geometry.Pose;
 
 public class TurretController {
     private final Pose goalPose = new Pose(10, 136, 0); // Goal position
-    private final double maxTurretAngle = Math.toRadians(270); // 270 degrees in radians
-    private final double ticksPerRadians; // Encoder ticks per radian of turret rotation
 
-    public TurretController(double ticksPerRotation) {
-        this.ticksPerRadians = ticksPerRotation / (2 * Math.PI);
+    // 470 ticks in each direction
+    private final int MAX_RIGHT_TICKS = 470;   // 90° to the right
+    private final int MAX_LEFT_TICKS = -470;   // 90° to the left
+
+    public TurretController() {
     }
 
     /**
-     * Calculate the angle from robot to goal
+     * Calculate the absolute angle to goal (only depends on coordinates)
      */
-    public double calculateAngleToGoal(Pose robotPose) {
+    public double calculateAbsoluteAngle(Pose robotPose) {
         double deltaX = goalPose.getX() - robotPose.getX();
         double deltaY = goalPose.getY() - robotPose.getY();
-
-        // Calculate absolute angle to goal
-        double absoluteAngleToGoal = Math.atan2(deltaY, deltaX);
-
-        // Adjust for robot heading (field-centric to robot-centric)
-        double relativeAngleToGoal = absoluteAngleToGoal - robotPose.getHeading();
-
-        // Normalize angle to [-π, π] range
-        return normalizeAngle(relativeAngleToGoal);
+        return Math.atan2(deltaX, deltaY); // Relative to vertical field line
     }
 
     /**
-     * Calculate turret motor target position (original method for compatibility)
+     * Calculate turret motor target position in ticks
      */
     public int calculateTurretPosition(Pose robotPose) {
-        double angleToGoal = calculateAngleToGoal(robotPose);
-        // Constrain angle to turret's physical limits
-        double constrainedAngle = constrainTurretAngle(angleToGoal);
-        // Convert to encoder ticks
-        return (int)(constrainedAngle * ticksPerRadians);
-    }
+        // Step 1: Get absolute angle to goal (only depends on coordinates)
+        double absoluteAngle = calculateAbsoluteAngle(robotPose);
 
-    /**
-     * NEW: Calculate turret position with continuous rotation
-     */
-    public int calculateTurretPosition(Pose robotPose, double currentTurretAngle) {
-        double desiredAngleToGoal = calculateAngleToGoal(robotPose);
+        // Step 2: Calculate turret angle using your formula
+        // Turret Angle = (Robot Heading - 90°) + Absolute Angle
+        double turretAngle = (robotPose.getHeading() - Math.toRadians(90)) + absoluteAngle;
 
-        // Find the closest equivalent angle within our continuous rotation system
-        double wrappedTargetAngle = findContinuousAngle(desiredAngleToGoal, currentTurretAngle);
+        // Normalize angle to [-π, π] range
+        turretAngle = normalizeAngle(turretAngle);
 
-        return (int)(wrappedTargetAngle * ticksPerRadians);
-    }
+        // Convert angle to ticks
+        double ticksPerRadian = 470.0 / (Math.PI / 2);
+        int targetTicks = (int)(turretAngle * ticksPerRadian);
 
-    /**
-     * Find the best target angle that's closest to current position
-     * while maintaining continuous rotation within limits
-     */
-    private double findContinuousAngle(double desiredAngle, double currentAngle) {
-        // Start with the basic desired angle
-        double bestAngle = desiredAngle;
-        double bestDistance = Math.abs(desiredAngle - currentAngle);
-
-        // Try adding/subtracting full rotations to find closer alternatives
-        for (int i = -2; i <= 2; i++) {
-            if (i == 0) continue; // Skip the original
-
-            double candidate = desiredAngle + (i * 2 * Math.PI);
-
-            // Only consider candidates within our physical limits
-            if (candidate >= -maxTurretAngle && candidate <= maxTurretAngle) {
-                double distance = Math.abs(candidate - currentAngle);
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    bestAngle = candidate;
-                }
-            }
-        }
-
-        return bestAngle;
+        // Constrain to physical limits
+        return constrainTurretTicks(targetTicks);
     }
 
     /**
@@ -89,53 +53,49 @@ public class TurretController {
     }
 
     /**
-     * Constrain turret angle to physical limits (-135° to +135° from center)
+     * Constrain turret ticks to physical limits
      */
-    private double constrainTurretAngle(double angle) {
-        double max = maxTurretAngle / 2; // ±135 degrees
-        double min = -maxTurretAngle / 2;
-
-        if (angle > max) return max;
-        if (angle < min) return min;
-        return angle;
+    private int constrainTurretTicks(int ticks) {
+        if (ticks > MAX_RIGHT_TICKS) return MAX_RIGHT_TICKS;
+        if (ticks < MAX_LEFT_TICKS) return MAX_LEFT_TICKS;
+        return ticks;
     }
 
     /**
      * Check if goal is within turret's range
      */
     public boolean isGoalInRange(Pose robotPose) {
-        double angleToGoal = calculateAngleToGoal(robotPose);
-        double max = maxTurretAngle / 2;
-        return angleToGoal >= -max && angleToGoal <= max;
+        int targetTicks = calculateTurretPosition(robotPose);
+        return targetTicks > MAX_LEFT_TICKS && targetTicks < MAX_RIGHT_TICKS;
     }
 
     /**
-     * NEW: Find the shortest path to the goal (continuous rotation optimization)
+     * Get the maximum right ticks
      */
-    public double getShortestPathAngle(double currentTurretAngle, double desiredAngle) {
-        double difference = desiredAngle - currentTurretAngle;
-
-        // Normalize to find shortest path
-        if (difference > Math.PI) difference -= 2 * Math.PI;
-        if (difference < -Math.PI) difference += 2 * Math.PI;
-
-        double targetAngle = currentTurretAngle + difference;
-
-        // Constrain to physical limits
-        return constrainTurretAngle(targetAngle);
+    public int getMaxRightTicks() {
+        return MAX_RIGHT_TICKS;
     }
 
     /**
-     * NEW: Get the maximum turret angle (for reference)
+     * Get the maximum left ticks
      */
-    public double getMaxTurretAngle() {
-        return maxTurretAngle;
+    public int getMaxLeftTicks() {
+        return MAX_LEFT_TICKS;
     }
 
     /**
-     * NEW: Get the center-to-limit angle (±135°)
+     * Get debug info about the angle calculation
      */
-    public double getMaxTurretAngleFromCenter() {
-        return maxTurretAngle / 2;
+    public String getDebugInfo(Pose robotPose) {
+        double absoluteAngle = calculateAbsoluteAngle(robotPose);
+        double turretAngle = (robotPose.getHeading() - Math.toRadians(90)) + absoluteAngle;
+        turretAngle = normalizeAngle(turretAngle);
+        int targetTicks = calculateTurretPosition(robotPose);
+
+        return String.format("Abs: %.1f°, RobotH: %.1f°, Turret: %.1f°, Ticks: %d",
+                Math.toDegrees(absoluteAngle),
+                Math.toDegrees(robotPose.getHeading()),
+                Math.toDegrees(turretAngle),
+                targetTicks);
     }
 }
