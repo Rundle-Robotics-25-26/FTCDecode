@@ -93,13 +93,27 @@ public class Teleop extends OpMode {
         }
 
         // ==== Spindexer ====
-        if (gamepad1.dpadLeftWasPressed()){
+        /*
+        if (gamepad1.dpadDownWasPressed()) {
+            if (!spindexer.spindexer.isBusy()) {
+                indexer.StopSpindex();
+            }
+        }
+
+        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
+            indexer.SwitchSpindex();
+        }
+        if (!indexer.canSpindex()) {
+            return;
+        }
+        if(gamepad1.dpadLeftWasPressed()){
             spindexer.rotateClockwise();
-            // Spinner will automatically maintain position 0
         } else if (gamepad1.dpadRightWasPressed()) {
             spindexer.rotateCounterclockwise();
-            // Spinner will automatically maintain position 0
         }
+        */
+
+
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
 
         // ==== Spinner Status ====

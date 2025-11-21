@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
 // this is so we can find how much a full rotation of the spindexer is
-@TeleOp(name = "Indexer test", group = "Tests")
+@TeleOp(name = "Spindexer test", group = "Tests")
 public class SpindexerTest extends OpMode {
     Spindexer spindexer = new Spindexer();
     @Override

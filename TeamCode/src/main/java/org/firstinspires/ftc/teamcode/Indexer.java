@@ -20,7 +20,7 @@ public class Indexer {
     // FIND THESE VALUES WITH THE TEST UPDATE
     final double ARM_START = 0.1317;
     final double ARM_INDEX = 0.4967;
-    final double ARM_SPINDEX = 0.3; // (NEED TUNING) THE POSITION THE INDEXER SHOULD BE AT WHEN SWITCHING SPINDEXER SLOTS
+    //final double ARM_SPINDEX = ;
     final double BASE_START = 0.13;
     final double BASE_INDEX = 0.3961;
     final double BASE_SPINDEX = 0.3; // NEED TUNING as well
@@ -33,7 +33,8 @@ public class Indexer {
 
     // Movement parameters (adjust these based on testing)
     private static final long BASE_MOVE_TIME = 800;  // ms
-    private static final long ARM_MOVE_TIME = 400;   // ms
+    private static final long ARM_MOVE_TIME = 400;   // ms;
+    private static final long SPINDEX_MOVE_TIME = 300;
     private static final long PHASE_DELAY = 50;      // ms between phases
     private static final long AUTO_WAIT_TIME = 1000; // ms to wait between open and close
 
@@ -44,6 +45,7 @@ public class Indexer {
     // Track which sequence we're running
     private boolean isOpeningSequence = false;
     private boolean autoCycleEnabled = false;
+    private boolean isSpindexerIndexed = false;
 
     public void Init(HardwareMap hardware, Telemetry tele) {
         hardwareMap = hardware;
@@ -77,6 +79,10 @@ public class Indexer {
     }
 
     public void Update(boolean pressed) {
+        if (isSpindexerIndexed) {
+            telemetry.addData("State", "MOVING Spindexer cause spindexing");
+            return;
+        }
         if (currentState == State.IN_SEQUENCE || currentState == State.WAITING) {
             updateSequence();
         } else {
@@ -92,6 +98,32 @@ public class Indexer {
         telemetry.addData("Indexer Open", indexerOpen);
         telemetry.update();
     }
+    public void SwitchSpindex() {
+        if (!isReadyToSpindex()) {
+            return;
+        }
+        isSpindexerIndexed = true;
+        sequenceStartTime = System.currentTimeMillis();
+        baseIndexer.setPosition(BASE_SPINDEX);
+    }
+    public boolean isReadyToSpindex() {
+        return currentState == State.IDLE;
+    }
+    public boolean canSpindex() {
+        long elapsed = System.currentTimeMillis() - sequenceStartTime;
+        if (isSpindexerIndexed && elapsed > SPINDEX_MOVE_TIME) { // the spindexer is at the position and are ready to switch slots
+            return true;
+        }
+        return false;
+    }
+    public void StopSpindex() {
+        if (canSpindex()) {
+            isSpindexerIndexed = false;
+            baseIndexer.setPosition(BASE_START);
+
+        }
+    }
+
 
     private void handleIdleState(boolean pressed) {
         // Toggle indexer open/closed

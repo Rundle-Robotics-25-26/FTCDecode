@@ -4,17 +4,20 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
 
 @TeleOp(name="Spindexer test")
 public class OpSpindexerTest1 extends OpMode {
     private final Spindexer spindexer = new Spindexer();
+    private final Indexer indexer = new Indexer();
     DcMotor spindexerMotor;
 
     @Override
     public void init(){
         spindexer.dataInit(hardwareMap);
+        indexer.Init(hardwareMap, telemetry);
     }
 
     @Override
@@ -24,14 +27,24 @@ public class OpSpindexerTest1 extends OpMode {
 
     @Override
     public void loop(){
-        if(gamepad1.cross) {
-            spindexer.GoToPos(1);
+        // indexer
+         if (gamepad1.dpad_down) {
+            if (spindexer.spindexer.isBusy()) {
+                return;
+            }
+            indexer.StopSpindex();
         }
-        else if(gamepad1.circle){
-            spindexer.rotateClockwise();
-        }
-        if (!spindexer.spindexer.isBusy()) {
 
+        if (gamepad1.dpad_left || gamepad1.dpad_right) {
+            indexer.SwitchSpindex();
+        }
+        if (!indexer.canSpindex()) {
+            return;
+        }
+        if(gamepad1.dpad_left){
+            spindexer.rotateClockwise();
+        } else if (gamepad1.dpad_right) {
+            spindexer.rotateCounterclockwise();
         }
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
