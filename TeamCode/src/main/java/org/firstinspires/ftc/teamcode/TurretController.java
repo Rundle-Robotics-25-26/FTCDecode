@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.pedropathing.geometry.Pose;
 
 public class TurretController {
-    private final Pose goalPose = new Pose(10, 136, 0); // Goal position
+    private final Pose goalPose = new Pose(0, 136, 0); // Goal position
 
     // 470 ticks in each direction
     private final int MAX_RIGHT_TICKS = 470;   // 90° to the right

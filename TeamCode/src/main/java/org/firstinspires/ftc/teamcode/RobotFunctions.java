@@ -25,7 +25,7 @@ public class RobotFunctions {
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.3);
+        turretMotor.setPower(0.6);
 
         currentTurretAngle = 0;
     }
@@ -41,9 +41,9 @@ public class RobotFunctions {
 
         // Only enable power when not at target to save battery
         if (Math.abs(turretMotor.getCurrentPosition() - targetPosition) > 10) {
-            turretMotor.setPower(0.3);
+            turretMotor.setPower(0.6);
         } else {
-            turretMotor.setPower(0.1);
+            turretMotor.setPower(0.3);
         }
 
         // Update our tracked angle

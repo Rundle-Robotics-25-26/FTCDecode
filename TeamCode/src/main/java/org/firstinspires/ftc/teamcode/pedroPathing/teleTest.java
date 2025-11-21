@@ -16,9 +16,9 @@ import java.util.function.Supplier;
 
 @Configurable
 @TeleOp
-public class TeleOPG extends OpMode {
+public class teleTest extends OpMode {
     private Follower follower;
-    public static Pose startingPose;
+    public static Pose startingPose = new Pose(40, 9, Math.toRadians(90)); // Set to (40, 8, 90°)
     private boolean automatedDrive;
     private Supplier<PathChain> pathChain;
     private TelemetryManager telemetryM;
@@ -31,23 +31,8 @@ public class TeleOPG extends OpMode {
 
     @Override
     public void init() {
-        // OPTION 1: Hardcode your starting position (48, 9) with 0 heading
-        startingPose = new Pose(48, 9, 90);
-        telemetry.addData("Starting Pose", "Hardcoded: (48, 9, 90°)");
-
         follower = Constants.createFollower(hardwareMap);
-
-        // IMU RESET CODE - ADDED THIS SECTION
-        telemetry.addData("Status", "Resetting IMU heading to 90°...");
-        telemetry.update();
-        try {
-            Thread.sleep(1000); // Wait 1 second
-            follower.setStartingPose(startingPose); // Force heading to 0
-            Thread.sleep(500); // Wait half second for reset to apply
-        } catch (InterruptedException e) {
-            telemetry.addData("IMU Reset", "Interrupted");
-        }
-
+        follower.setStartingPose(startingPose); // Now startingPose is never null
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
@@ -55,21 +40,23 @@ public class TeleOPG extends OpMode {
         robotFunctions = new RobotFunctions();
         robotFunctions.initTurret(hardwareMap, follower);
 
-        pathChain = () -> follower.pathBuilder()
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
-
-        telemetry.addData("Status", "IMU reset complete - check heading");
     }
 
     @Override
     public void start() {
+        //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
+        //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
+        //If you don't pass anything in, it uses the default (false)
         follower.startTeleopDrive();
     }
 
     @Override
     public void loop() {
+        //Call this once per loop
         follower.update();
         telemetryM.update();
 
@@ -79,17 +66,23 @@ public class TeleOPG extends OpMode {
         }
 
         if (!automatedDrive) {
+            //Make the last parameter false for field-centric
+            //In case the drivers want to use a "slowMode" you can scale the vectors
+
+            //This is the normal version to use in the TeleOp
             if (!slowMode) follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
-                    false
+                    true // Robot Centric
             );
+
+                //This is how it looks with slowMode on
             else follower.setTeleOpDrive(
                     -gamepad1.left_stick_y * slowModeMultiplier,
                     -gamepad1.left_stick_x * slowModeMultiplier,
                     -gamepad1.right_stick_x * slowModeMultiplier,
-                    false
+                    true // Robot Centric
             );
         }
 
@@ -110,12 +103,13 @@ public class TeleOPG extends OpMode {
             slowMode = !slowMode;
         }
 
-        // TURRET CONTROLS
+        // TURRET CONTROLS - ADD THESE
+        // Toggle auto-aim on/off - Gamepad2 Left Bumper
         if (gamepad2.left_bumper) {
             turretEnabled = !turretEnabled;
         }
 
-        // Manual turret control (when auto-aim is off)
+        // Manual turret control (when auto-aim is off) - Gamepad2 Right Stick
         if (!turretEnabled) {
             double manualTurretSpeed = -gamepad2.right_stick_x * 0.5;
             if (Math.abs(manualTurretSpeed) > 0.1) {
@@ -125,7 +119,7 @@ public class TeleOPG extends OpMode {
             }
         }
 
-        // Reset turret to center (when auto-aim is off)
+        // Reset turret to center (when auto-aim is off) - Gamepad2 D-pad Down
         if (gamepad2.dpad_down && !turretEnabled) {
             robotFunctions.setTurretManualPosition(0);
         }
@@ -153,7 +147,6 @@ public class TeleOPG extends OpMode {
         telemetry.addData("Goal In Range", robotFunctions.isGoalInRange() ? "YES" : "NO");
         telemetry.addData("Turret Debug", robotFunctions.getTurretDebugInfo());
 
-        // Add current pose to regular telemetry for easy viewing
         telemetry.addData("Current Pose", "X: %.1f, Y: %.1f, Heading: %.1f°",
                 follower.getPose().getX(),
                 follower.getPose().getY(),
