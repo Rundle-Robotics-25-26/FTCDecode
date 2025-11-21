@@ -24,9 +24,6 @@ public class ColorScanningTest extends OpMode {
 
     @Override
     public void loop() {
-        if (gamepad1.circle) {
-            colorScanning.Reset();
-        }
         //colorScanning.ScanAll(); // test 1
         colorScanning.MoveToEmptySlot(); // test 2
         telemetry.update();

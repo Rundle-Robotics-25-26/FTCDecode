@@ -63,7 +63,7 @@ public class Teleop extends OpMode {
         spindexer.freshInit(hardwareMap);
 
         // ==== Simple turret setup ====
-        simpleTurret.Init(hardwareMap);
+        //simpleTurret.Init(hardwareMap);
 
         // ==== Shooter setup ====
         shooter = hardwareMap.get(DcMotor.class, "shooter");
@@ -100,7 +100,7 @@ public class Teleop extends OpMode {
             spindexer.rotateCounterclockwise();
             // Spinner will automatically maintain position 0
         }
-        telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
+        //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
 
         // ==== Spinner Status ====
         telemetry.addData("Spinner Position", spinner.getCurrentPosition());
@@ -109,8 +109,8 @@ public class Teleop extends OpMode {
         telemetry.addData("Spinner Busy", spinner.isBusy());
 
         // ==== Simple turret ====
-        simpleTurret.TurretControl(gamepad1.left_trigger, gamepad1.right_trigger);
-        telemetry.addData("Current turret position: ", simpleTurret.turret.getCurrentPosition());
+        //simpleTurret.TurretControl(gamepad1.left_trigger, gamepad1.right_trigger);
+        //telemetry.addData("Current turret position: ", simpleTurret.turret.getCurrentPosition());
 
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
@@ -177,12 +177,12 @@ public class Teleop extends OpMode {
         }
 
         // ==== Shooter Telemetry ====
-        telemetry.addData("Shooter Power", "%.2f", shooter.getPower());
+        /*telemetry.addData("Shooter Power", "%.2f", shooter.getPower());
         telemetry.addData("Shooter Mode", shooter.getMode().toString());
         telemetry.addData("Shooter Status", shooterOn ? "RUNNING" : "STOPPED");
         telemetry.addData("Shooter Speed", "%.1f", Math.abs(currentShooterPower * 100));
         telemetry.addData("Controls", "△: 0.6 Power, □: 0.4 Power, X: 0.8 Power");
-
+        */
         // ==== Indexer ====
         indexer.Update(gamepad1.circle);
 
