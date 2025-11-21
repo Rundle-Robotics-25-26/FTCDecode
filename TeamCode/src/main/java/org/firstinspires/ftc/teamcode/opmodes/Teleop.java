@@ -93,6 +93,31 @@ public class Teleop extends OpMode {
         }
 
         // ==== Spindexer ====
+        telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
+        if (gamepad1.dpad_down) {
+            if (spindexer.spindexer.isBusy()) {
+                telemetry.addData("Status: ", "Spindexer is busy");
+            } else {
+                indexer.StopSpindex();
+            }
+        } else {
+            if (indexer.canSpindex()) {
+                telemetry.addData("Status: ", "Can spindex");
+                telemetry.addData("Is dpad_left down", gamepad1.dpad_left);
+                if (gamepad1.dpad_left) {
+                    spindexer.rotateClockwise();
+                    indexer.StopSpindex();
+                } else if (gamepad1.dpad_right) {
+                    spindexer.rotateCounterclockwise();
+                    indexer.StopSpindex();
+                }
+            } else {
+                telemetry.addData("Status: ", "CANNOT spindex");
+                if (gamepad1.dpad_left || gamepad1.dpad_right) {
+                    indexer.SwitchSpindex();
+                }
+            }
+        }
         /*
         if (gamepad1.dpadDownWasPressed()) {
             if (!spindexer.spindexer.isBusy()) {

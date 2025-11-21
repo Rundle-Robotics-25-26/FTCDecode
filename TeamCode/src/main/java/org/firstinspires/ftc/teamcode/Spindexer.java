@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class Spindexer {
     // the spindexer is a motor driven 3 chamber ball storage
     /* this code aims to be a general class that can:
@@ -27,8 +29,10 @@ public class Spindexer {
     private double positionThree = targetPositionMultiple * 3;
 
     private final double SPEED = 0.5;
+    private boolean putSpindexerDown = false;
 
     public int currentPosition = 1;
+
 
     // CHANGE THIS IF PRELOADING
     public int[] posStates = {-1, -1, -1}; //the array that will store what is in each slot in the spindexer ( -1 - unknown, 0-empty, 1-green, 2-purple)
@@ -104,13 +108,16 @@ public class Spindexer {
         return ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
     }
     public void rotateClockwise() {
+        rotateClockwise(false);
+    }
+    public void rotateClockwise(boolean putDown) {
         if (spindexer.isBusy()) {
             return;
         }
         int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
-
+        putSpindexerDown = putDown;
         currentPosition = getNewClockwisePos();
 
         /*
@@ -121,14 +128,17 @@ public class Spindexer {
         positions[2] = positions[1];
         */
     }
-
     public void rotateCounterclockwise() {
+        rotateCounterclockwise(false);
+    }
+    public void rotateCounterclockwise(boolean putDown) {
         if (spindexer.isBusy()) {
             return;
         }
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
+        putSpindexerDown = putDown;
 
         currentPosition = getNewCounterClockwisePos();
 

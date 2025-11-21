@@ -20,10 +20,10 @@ public class Indexer {
     // FIND THESE VALUES WITH THE TEST UPDATE
     final double ARM_START = 0.1317;
     final double ARM_INDEX = 0.4967;
-    //final double ARM_SPINDEX = ;
+    final double ARM_SPINDEX = 0.4428;
     final double BASE_START = 0.13;
     final double BASE_INDEX = 0.3961;
-    final double BASE_SPINDEX = 0.3; // NEED TUNING as well
+    final double BASE_SPINDEX = 0.2628;
 
     // New movement system variables
     private enum State { IDLE, IN_SEQUENCE, WAITING }
@@ -105,6 +105,7 @@ public class Indexer {
         isSpindexerIndexed = true;
         sequenceStartTime = System.currentTimeMillis();
         baseIndexer.setPosition(BASE_SPINDEX);
+        armIndexer.setPosition(ARM_SPINDEX);
     }
     public boolean isReadyToSpindex() {
         return currentState == State.IDLE;
@@ -120,7 +121,7 @@ public class Indexer {
         if (canSpindex()) {
             isSpindexerIndexed = false;
             baseIndexer.setPosition(BASE_START);
-
+            armIndexer.setPosition(ARM_START);
         }
     }
 
