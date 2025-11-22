@@ -92,53 +92,6 @@ public class Teleop extends OpMode {
             Intake(-1);
         }
 
-        // ==== Spindexer ====
-        telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
-        if (gamepad1.dpad_down) {
-            if (spindexer.spindexer.isBusy()) {
-                telemetry.addData("Status: ", "Spindexer is busy");
-            } else {
-                indexer.StopSpindex();
-            }
-        } else {
-            if (indexer.canSpindex()) {
-                telemetry.addData("Status: ", "Can spindex");
-                telemetry.addData("Is dpad_left down", gamepad1.dpad_left);
-                if (gamepad1.dpad_left) {
-                    spindexer.rotateClockwise();
-                    indexer.StopSpindex();
-                } else if (gamepad1.dpad_right) {
-                    spindexer.rotateCounterclockwise();
-                    indexer.StopSpindex();
-                }
-            } else {
-                telemetry.addData("Status: ", "CANNOT spindex");
-                if (gamepad1.dpad_left || gamepad1.dpad_right) {
-                    indexer.SwitchSpindex();
-                }
-            }
-        }
-        /*
-        if (gamepad1.dpadDownWasPressed()) {
-            if (!spindexer.spindexer.isBusy()) {
-                indexer.StopSpindex();
-            }
-        }
-
-        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
-            indexer.SwitchSpindex();
-        }
-        if (!indexer.canSpindex()) {
-            return;
-        }
-        if(gamepad1.dpadLeftWasPressed()){
-            spindexer.rotateClockwise();
-        } else if (gamepad1.dpadRightWasPressed()) {
-            spindexer.rotateCounterclockwise();
-        }
-        */
-
-
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
 
         // ==== Spinner Status ====
@@ -224,6 +177,12 @@ public class Teleop extends OpMode {
         */
         // ==== Indexer ====
         indexer.Update(gamepad1.circle);
+
+        // ==== Spindexer ====
+        telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
+        if (gamepad1.dpad_left || gamepad1.dpad_right) {
+            indexer.spindex(gamepad1.dpad_left, spindexer);
+        }
 
         telemetry.update();
     }
