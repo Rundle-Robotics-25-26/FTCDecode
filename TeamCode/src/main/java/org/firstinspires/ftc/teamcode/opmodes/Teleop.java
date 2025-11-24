@@ -84,60 +84,16 @@ public class Teleop extends OpMode {
         driveMecanum(drive, strafe, rotate);
 
         // ==== Intake ====
-        Intake(0);
-        if(gamepad1.right_bumper){
+        if (gamepad1.right_trigger > 0.1) {  // Adjust threshold as needed
             Intake(1);
+        } else {
+            Intake(0);  // Stop
         }
-        if(gamepad1.left_bumper) {
+        Intake(0);
+
+        if(gamepad1.dpad_up) {
             Intake(-1);
         }
-
-        // ==== Spindexer ====
-        telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
-        if (gamepad1.dpad_down) {
-            if (spindexer.spindexer.isBusy()) {
-                telemetry.addData("Status: ", "Spindexer is busy");
-            } else {
-                indexer.StopSpindex();
-            }
-        } else {
-            if (indexer.canSpindex()) {
-                telemetry.addData("Status: ", "Can spindex");
-                telemetry.addData("Is dpad_left down", gamepad1.dpad_left);
-                if (gamepad1.dpad_left) {
-                    spindexer.rotateClockwise();
-                    indexer.StopSpindex();
-                } else if (gamepad1.dpad_right) {
-                    spindexer.rotateCounterclockwise();
-                    indexer.StopSpindex();
-                }
-            } else {
-                telemetry.addData("Status: ", "CANNOT spindex");
-                if (gamepad1.dpad_left || gamepad1.dpad_right) {
-                    indexer.SwitchSpindex();
-                }
-            }
-        }
-        /*
-        if (gamepad1.dpadDownWasPressed()) {
-            if (!spindexer.spindexer.isBusy()) {
-                indexer.StopSpindex();
-            }
-        }
-
-        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
-            indexer.SwitchSpindex();
-        }
-        if (!indexer.canSpindex()) {
-            return;
-        }
-        if(gamepad1.dpadLeftWasPressed()){
-            spindexer.rotateClockwise();
-        } else if (gamepad1.dpadRightWasPressed()) {
-            spindexer.rotateCounterclockwise();
-        }
-        */
-
 
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
 
@@ -153,7 +109,7 @@ public class Teleop extends OpMode {
 
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
-        if (gamepad1.triangle) {
+        if (gamepad1.square) {
             if (!pressedTriangle) {
                 pressedTriangle = true;
 
@@ -174,7 +130,7 @@ public class Teleop extends OpMode {
         }
 
         // Square button: Toggle 0.4 power
-        if (gamepad1.square) {
+        if (gamepad1.triangle) {
             if (!pressedSquare) {
                 pressedSquare = true;
 
@@ -224,6 +180,12 @@ public class Teleop extends OpMode {
         */
         // ==== Indexer ====
         indexer.Update(gamepad1.circle);
+
+        // ==== Spindexer ====
+        telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
+        if (gamepad1.left_bumper || gamepad1.right_bumper) {
+            indexer.spindex(gamepad1.left_bumper, spindexer);
+        }
 
         telemetry.update();
     }

@@ -28,8 +28,7 @@ public class Spindexer {
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
 
-    private final double SPEED = 0.5;
-    private boolean putSpindexerDown = false;
+    private final double SPEED = 0.75;
 
     public int currentPosition = 1;
 
@@ -107,17 +106,14 @@ public class Spindexer {
     public int getNewCounterClockwisePos() {
         return ((currentPosition + 1) % 3) + 1; // 1->3, 2->1, 3->2
     }
+
     public void rotateClockwise() {
-        rotateClockwise(false);
-    }
-    public void rotateClockwise(boolean putDown) {
         if (spindexer.isBusy()) {
             return;
         }
         int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
-        putSpindexerDown = putDown;
         currentPosition = getNewClockwisePos();
 
         /*
@@ -128,17 +124,14 @@ public class Spindexer {
         positions[2] = positions[1];
         */
     }
+
     public void rotateCounterclockwise() {
-        rotateCounterclockwise(false);
-    }
-    public void rotateCounterclockwise(boolean putDown) {
         if (spindexer.isBusy()) {
             return;
         }
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
-        putSpindexerDown = putDown;
 
         currentPosition = getNewCounterClockwisePos();
 

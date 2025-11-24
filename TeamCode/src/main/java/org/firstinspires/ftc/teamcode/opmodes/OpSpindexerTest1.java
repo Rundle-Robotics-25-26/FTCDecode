@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Spindexer;
 public class OpSpindexerTest1 extends OpMode {
     private final Spindexer spindexer = new Spindexer();
     private final Indexer indexer = new Indexer();
+    boolean putSpindexerDown = false;
     DcMotor spindexerMotor;
 
     @Override
@@ -29,28 +30,9 @@ public class OpSpindexerTest1 extends OpMode {
     public void loop(){
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
         // indexer
-         if (gamepad1.dpad_down) {
-            if (spindexer.spindexer.isBusy()) {
-                telemetry.addData("Status: ", "Spindexer is busy");
-                return;
-            }
-            indexer.StopSpindex();
+        if (gamepad1.dpad_left || gamepad1.dpad_right) {
+            indexer.spindex(gamepad1.dpad_left, spindexer);
         }
-        if (indexer.canSpindex()) {
-            telemetry.addData("Status: ", "Can spindex");
-            telemetry.addData("Is dpad_left down", gamepad1.dpad_left);
-            if(gamepad1.dpad_left){
-                spindexer.rotateClockwise();
-            } else if (gamepad1.dpad_right) {
-                spindexer.rotateCounterclockwise();
-            }
-        } else {
-            telemetry.addData("Status: ", "CANNOT spindex");
-            if (gamepad1.dpad_left || gamepad1.dpad_right) {
-                indexer.SwitchSpindex();
-            }
-        }
-
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);
