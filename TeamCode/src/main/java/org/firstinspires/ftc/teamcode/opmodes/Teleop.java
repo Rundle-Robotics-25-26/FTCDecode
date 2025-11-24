@@ -84,11 +84,14 @@ public class Teleop extends OpMode {
         driveMecanum(drive, strafe, rotate);
 
         // ==== Intake ====
-        Intake(0);
-        if(gamepad1.right_bumper){
+        if (gamepad1.right_trigger > 0.1) {  // Adjust threshold as needed
             Intake(1);
+        } else {
+            Intake(0);  // Stop
         }
-        if(gamepad1.left_bumper) {
+        Intake(0);
+
+        if(gamepad1.dpad_up) {
             Intake(-1);
         }
 
@@ -106,7 +109,7 @@ public class Teleop extends OpMode {
 
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
-        if (gamepad1.triangle) {
+        if (gamepad1.square) {
             if (!pressedTriangle) {
                 pressedTriangle = true;
 
@@ -127,7 +130,7 @@ public class Teleop extends OpMode {
         }
 
         // Square button: Toggle 0.4 power
-        if (gamepad1.square) {
+        if (gamepad1.triangle) {
             if (!pressedSquare) {
                 pressedSquare = true;
 
@@ -180,8 +183,8 @@ public class Teleop extends OpMode {
 
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
-        if (gamepad1.dpad_left || gamepad1.dpad_right) {
-            indexer.spindex(gamepad1.dpad_left, spindexer);
+        if (gamepad1.left_bumper || gamepad1.right_bumper) {
+            indexer.spindex(gamepad1.left_bumper, spindexer);
         }
 
         telemetry.update();
