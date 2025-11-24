@@ -2,100 +2,140 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.geometry.Pose;
 
+/**
+ * Manages the calculation of the target position (in motor ticks) for a turret.
+ * Assumes the turret is centered at its starting position (0 ticks) and has
+ * a 180-degree range (-90 to +90 degrees, or -PI/2 to +PI/2 radians).
+ */
 public class TurretController {
-    private final Pose goalPose = new Pose(0, 136, 0); // Goal position
 
-    // 470 ticks in each direction
-    private final int MAX_RIGHT_TICKS = 470;   // 90° to the right
-    private final int MAX_LEFT_TICKS = -470;   // 90° to the left
+    // --- Constants ---
+    // A constant representing 90 degrees in radians (PI/2) for clarity
+    private static final double DEGREE_90_IN_RADIANS = Math.PI / 2.0;
 
-    public TurretController() {
-    }
+    // Turret's target location on the field (e.g., a goal)
+    private final Pose GOAL_POSE = new Pose(0.0, 136.0, 0.0);
+
+    // Motor limits (470 ticks corresponds to 90 degrees/PI/2 radians)
+    private final int MAX_RIGHT_TICKS = 470;
+    private final int MAX_LEFT_TICKS = -470;
+
+    // Pre-calculate the conversion factor to avoid repeated calculation
+    // Ticks / Radian = (470 ticks) / (PI/2 radians)
+    private final double TICKS_PER_RADIAN = MAX_RIGHT_TICKS / DEGREE_90_IN_RADIANS;
+
+    // --- Constructor ---
+    // Removed the explicit public constructor as it's empty and unnecessary in this case.
+
+    // --- Calculation Methods ---
 
     /**
-     * Calculate the absolute angle to goal (only depends on coordinates)
+     * Calculates the absolute angle from the robot's current position to the goal.
+     * This angle is relative to the field's vertical (Y) axis (Math.atan2(dx, dy)).
+     * @param robotPose The current pose of the robot on the field.
+     * @return The absolute angle to the goal in radians.
      */
     public double calculateAbsoluteAngle(Pose robotPose) {
-        double deltaX = goalPose.getX() - robotPose.getX();
-        double deltaY = goalPose.getY() - robotPose.getY();
-        return Math.atan2(deltaX, deltaY); // Relative to vertical field line
+        double deltaX = GOAL_POSE.getX() - robotPose.getX();
+        double deltaY = GOAL_POSE.getY() - robotPose.getY();
+        // Uses Math.atan2(dx, dy) which is relative to the positive Y axis (vertical).
+        return Math.atan2(deltaX, deltaY);
     }
 
     /**
-     * Calculate turret motor target position in ticks
+     * Calculates the required turret motor target position in ticks to face the goal.
+     * Turret Angle = (Robot Heading - 90°) + Absolute Angle
+     * @param robotPose The current pose of the robot on the field.
+     * @return The constrained target position for the turret motor in ticks.
      */
     public int calculateTurretPosition(Pose robotPose) {
         // Step 1: Get absolute angle to goal (only depends on coordinates)
         double absoluteAngle = calculateAbsoluteAngle(robotPose);
 
-        // Step 2: Calculate turret angle using your formula
-        // Turret Angle = (Robot Heading - 90°) + Absolute Angle
-        double turretAngle = (robotPose.getHeading() - Math.toRadians(90)) + absoluteAngle;
+        // Step 2: Calculate turret angle based on robot heading and absolute angle.
+        // Formula: Turret Angle = (Robot Heading - 90°) + Absolute Angle
+        // We use the pre-calculated DEGREE_90_IN_RADIANS constant.
+        double turretAngle = (robotPose.getHeading() - DEGREE_90_IN_RADIANS) + absoluteAngle;
 
-        // Normalize angle to [-π, π] range
+        // Step 3: Normalize the angle to the required [-π, π] range.
         turretAngle = normalizeAngle(turretAngle);
 
-        // Convert angle to ticks
-        double ticksPerRadian = 470.0 / (Math.PI / 2);
-        int targetTicks = (int)(turretAngle * ticksPerRadian);
+        // Step 4: Convert angle (radians) to ticks using the pre-calculated constant.
+        int targetTicks = (int) (turretAngle * TICKS_PER_RADIAN);
 
-        // Constrain to physical limits
+        // Step 5: Constrain to physical limits and return.
         return constrainTurretTicks(targetTicks);
     }
 
+    // --- Utility Methods ---
+
     /**
-     * Normalize angle to [-π, π] range
+     * Normalize an angle to the [-π, π] range.
+     * @param angle The angle in radians.
+     * @return The normalized angle in radians.
      */
     private double normalizeAngle(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
+        // Optimized normalization using the Math.IEEEremainder function (preferred for speed)
+        // or a similar check. Since the original implementation used a while loop,
+        // we'll maintain the logic for maximum compatibility and clarity, but with a slight change.
+
+        // A more canonical and efficient way to normalize a radian angle to [-pi, pi]
+        // without a loop is using the formula:
+        // angle - 2 * PI * floor((angle + PI) / (2 * PI))
+        return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
     }
 
     /**
-     * Constrain turret ticks to physical limits
+     * Constrains the calculated turret ticks to the motor's physical limits.
+     * @param ticks The raw target ticks.
+     * @return The constrained ticks.
      */
     private int constrainTurretTicks(int ticks) {
-        if (ticks > MAX_RIGHT_TICKS) return MAX_RIGHT_TICKS;
-        if (ticks < MAX_LEFT_TICKS) return MAX_LEFT_TICKS;
-        return ticks;
+        // Use Math.max and Math.min for cleaner, single-line constraint logic.
+        return Math.max(MAX_LEFT_TICKS, Math.min(MAX_RIGHT_TICKS, ticks));
     }
 
     /**
-     * Check if goal is within turret's range
+     * Checks if the goal is within the turret's operational range given the robot's pose.
+     * @param robotPose The current pose of the robot on the field.
+     * @return true if the goal is reachable by the turret, false otherwise.
      */
     public boolean isGoalInRange(Pose robotPose) {
         int targetTicks = calculateTurretPosition(robotPose);
+        // The constrainTurretTicks method ensures that targetTicks is exactly at the limit
+        // if the raw angle was outside. We must check if the constrained value is NOT at the limit.
         return targetTicks > MAX_LEFT_TICKS && targetTicks < MAX_RIGHT_TICKS;
     }
 
-    /**
-     * Get the maximum right ticks
-     */
+    // --- Accessor (Getter) Methods ---
+
     public int getMaxRightTicks() {
         return MAX_RIGHT_TICKS;
     }
 
-    /**
-     * Get the maximum left ticks
-     */
     public int getMaxLeftTicks() {
         return MAX_LEFT_TICKS;
     }
 
+    // --- Debugging Method ---
+
     /**
-     * Get debug info about the angle calculation
+     * Provides detailed debug information about the angle calculation process.
+     * Note: This recalculates the steps for debugging purposes, which is acceptable here.
+     * @param robotPose The current pose of the robot.
+     * @return A formatted String containing debug data.
      */
     public String getDebugInfo(Pose robotPose) {
         double absoluteAngle = calculateAbsoluteAngle(robotPose);
-        double turretAngle = (robotPose.getHeading() - Math.toRadians(90)) + absoluteAngle;
-        turretAngle = normalizeAngle(turretAngle);
-        int targetTicks = calculateTurretPosition(robotPose);
+        double turretAngleRaw = (robotPose.getHeading() - DEGREE_90_IN_RADIANS) + absoluteAngle;
+        double turretAngleNormalized = normalizeAngle(turretAngleRaw);
+        int targetTicks = calculateTurretPosition(robotPose); // Recalculate for final constrained value
 
-        return String.format("Abs: %.1f°, RobotH: %.1f°, Turret: %.1f°, Ticks: %d",
+        return String.format("Abs: %.1f°, RobotH: %.1f°, Turret(Raw): %.1f°, Turret(Norm): %.1f°, Ticks: %d",
                 Math.toDegrees(absoluteAngle),
                 Math.toDegrees(robotPose.getHeading()),
-                Math.toDegrees(turretAngle),
+                Math.toDegrees(turretAngleRaw),
+                Math.toDegrees(turretAngleNormalized),
                 targetTicks);
     }
 }

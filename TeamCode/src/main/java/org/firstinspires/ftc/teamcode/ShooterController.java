@@ -2,57 +2,85 @@ package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
+/**
+ * Manages the shooter motor and calculates its required power based on
+ * the robot's distance to the goal using linear interpolation from a curve.
+ */
 public class ShooterController {
-    private final Pose goalPose = new Pose(10, 136, 0);
-    private DcMotorEx shooterMotor;
-    private Follower follower;
-    private double currentPower = 0;
+
+    // --- Configuration Constants ---
+    private final Pose GOAL_POSE = new Pose(10.0, 136.0, 0.0);
 
     // Lookup table: {distance_in_inches, power}
-    // TEST AND ADJUST THESE VALUES BASED ON REAL TESTING!
     private final double[][] POWER_CURVE = {
-            {0, 0.3},   // 0 inches: 30% power
-            {20, 0.4},  // 20 inches: 40% power
-            {40, 0.55}, // 40 inches: 55% power
-            {60, 0.75}, // 60 inches: 75% power
-            {80, 0.9},  // 80 inches: 90% power
-            {100, 1.0}  // 100+ inches: 100% power
+            {0.0, 0.3},
+            {20.0, 0.4},
+            {40.0, 0.55},
+            {60.0, 0.75},
+            {80.0, 0.9},
+            {100.0, 1.0}
     };
 
-    public void initShooter(HardwareMap hardwareMap, Follower follower) {
+    // --- Hardware and State ---
+    private DcMotorEx shooterMotor;
+    private final Follower follower; // Now final, must be set in constructor
+    private double commandedPower = 0.0;
+
+    // --- Constructor ---
+    public ShooterController(Follower follower) {
         this.follower = follower;
+    }
+
+    //--------------------------- INITIALIZATION ---------------------------------------------------
+
+    /**
+     * Initializes the shooter motor hardware.
+     */
+    public void initShooter(HardwareMap hardwareMap) {
         shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
         shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooterMotor.setPower(0.0);
     }
 
+    //--------------------------- CALCULATION METHODS ----------------------------------------------
+
+    /**
+     * Calculates the direct distance from the robot's current pose to the defined goal pose.
+     * @return The distance in inches (assuming Pose coordinates are in inches).
+     */
     public double calculateDistanceToGoal() {
         Pose robotPose = follower.getPose();
-        double deltaX = goalPose.getX() - robotPose.getX();
-        double deltaY = goalPose.getY() - robotPose.getY();
-        return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        double deltaX = GOAL_POSE.getX() - robotPose.getX();
+        double deltaY = GOAL_POSE.getY() - robotPose.getY();
+        return Math.hypot(deltaX, deltaY);
     }
 
+    /**
+     * Calculates the required shooter power by linearly interpolating the distance.
+     * @return The target power (0.0 to 1.0).
+     */
     public double calculateShooterPower() {
         double distance = calculateDistanceToGoal();
 
-        // Handle distances below first point
+        // 1. Boundary Check: Below minimum distance
         if (distance <= POWER_CURVE[0][0]) {
             return POWER_CURVE[0][1];
         }
 
-        // Handle distances above last point
-        if (distance >= POWER_CURVE[POWER_CURVE.length - 1][0]) {
-            return POWER_CURVE[POWER_CURVE.length - 1][1];
+        // 2. Boundary Check: Above maximum distance
+        int lastIndex = POWER_CURVE.length - 1;
+        if (distance >= POWER_CURVE[lastIndex][0]) {
+            return POWER_CURVE[lastIndex][1];
         }
 
-        // Find the two closest data points and interpolate
-        for (int i = 0; i < POWER_CURVE.length - 1; i++) {
-            if (distance >= POWER_CURVE[i][0] && distance <= POWER_CURVE[i + 1][0]) {
+        // 3. Linear Interpolation
+        for (int i = 0; i < lastIndex; i++) {
+            if (distance < POWER_CURVE[i + 1][0]) {
                 double x1 = POWER_CURVE[i][0];
                 double y1 = POWER_CURVE[i][1];
                 double x2 = POWER_CURVE[i + 1][0];
@@ -64,33 +92,38 @@ public class ShooterController {
         }
 
         // Fallback
-        return POWER_CURVE[POWER_CURVE.length - 1][1];
+        return POWER_CURVE[lastIndex][1];
     }
 
+    //--------------------------- CONTROL METHOD ---------------------------------------------------
+
+    /**
+     * Updates the shooter motor power based on the trigger state.
+     * @param triggerHeld True if the driver is commanding the shooter to fire.
+     */
     public void setShooterPower(boolean triggerHeld) {
         if (triggerHeld) {
-            currentPower = calculateShooterPower();
-            shooterMotor.setPower(currentPower);
+            commandedPower = calculateShooterPower();
+            shooterMotor.setPower(commandedPower);
         } else {
-            currentPower = 0;
-            shooterMotor.setPower(0);
+            commandedPower = 0.0;
+            shooterMotor.setPower(0.0);
         }
     }
 
-    public double getCurrentPower() {
-        return currentPower;
-    }
+    //--------------------------- ACCESSOR METHODS -------------------------------------------------
 
-    public double getDistanceToGoal() {
-        return calculateDistanceToGoal();
+    /**
+     * @return The last power commanded to the motor (0.0 if off).
+     */
+    public double getCommandedPower() {
+        return commandedPower;
     }
 
     /**
-     * For testing: manually override the power curve
+     * @return The distance to the goal in inches, recalculated on demand.
      */
-    public void setPowerCurve(double[][] newPowerCurve) {
-        // You can use this method to update the power curve during testing
-        // without recompiling
-        // this.POWER_CURVE = newPowerCurve; // Would need to remove final modifier
+    public double getDistanceToGoal() {
+        return calculateDistanceToGoal();
     }
 }

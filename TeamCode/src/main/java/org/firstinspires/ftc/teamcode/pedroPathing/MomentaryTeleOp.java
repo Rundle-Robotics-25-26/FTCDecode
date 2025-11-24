@@ -11,20 +11,20 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.RobotFunctions;
+import org.firstinspires.ftc.teamcode.MomentaryRobotFunctions; // *** NEW CLASS IMPORT ***
 
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp(name = "TeleOp Test Drive - G1 Core")
-public class teleTest extends OpMode {
+@TeleOp(name = "MOMENTARY TeleOp - G1 Core")
+public class MomentaryTeleOp extends OpMode { // *** NEW CLASS NAME ***
 
     // --- CONFIGURABLE CONSTANTS ---
     public static final double SLOW_MODE_MULTIPLIER_INCREMENT = 0.25;
     public static final double MANUAL_TURRET_TICK_RATE = 15.0;
     public static final double MANUAL_TURRET_DEADZONE = 0.1;
     public static final double DEFAULT_SLOW_MODE_MULTIPLIER = 0.5;
-    public static final double SHOOTER_TRIGGER_THRESHOLD = 0.1;
+    public static final double TRIGGER_THRESHOLD = 0.1;
 
     // --- FOLLOW, DRIVETRAIN & POSE ---
     private Follower follower;
@@ -32,9 +32,8 @@ public class teleTest extends OpMode {
     private Supplier<PathChain> pathChainSupplier;
 
     // --- STATE MANAGEMENT ---
-    private RobotFunctions robotFunctions;
+    private MomentaryRobotFunctions robotFunctions; // *** NEW CLASS INSTANCE ***
     private boolean isAutomatedDrive = false;
-    private boolean isTurretAutoAimEnabled = true;
     private double slowModeMultiplier = DEFAULT_SLOW_MODE_MULTIPLIER;
     private boolean isSlowMode = false;
 
@@ -43,19 +42,15 @@ public class teleTest extends OpMode {
     //--------------------------- INIT -------------------------------------------------------------
     @Override
     public void init() {
-        // Initialize Follower and set start pose
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
 
-        // Initialize Telemetry Manager
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-        // Initialize ALL Systems (Turret and Shooter)
-        robotFunctions = new RobotFunctions();
+        robotFunctions = new MomentaryRobotFunctions(); // *** USE MOMENTARY CLASS ***
         robotFunctions.init(hardwareMap, follower);
 
-        // Define PathChain lazily.
         pathChainSupplier = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
@@ -75,61 +70,54 @@ public class teleTest extends OpMode {
         follower.update();
         telemetryM.update();
 
-        // 2. Turret Auto-Aim Update (if enabled)
-        if (isTurretAutoAimEnabled) {
-            robotFunctions.updateTurret();
-        }
+        // Check the primary trigger for the turret state
+        boolean aimCommanded = gamepad1.left_trigger > TRIGGER_THRESHOLD;
 
-        // 3. GamePad Input Handling (Driver 1 - Core Movement & Firing)
+        // 2. Turret Update: Call the new Momentary Logic
+        robotFunctions.updateTurret(aimCommanded);
+
+        // 3. GamePad Input Handling
         handleDriverOneControls();
+        handleDriverTwoControls(aimCommanded); // Pass state to G2
 
-        // 4. GamePad Input Handling (Driver 2 - Precision/Manual Turret)
-        handleDriverTwoControls();
-
-        // 5. Telemetry Output
+        // 4. Telemetry Output
         updateTelemetry();
     }
 
     // --- DRIVER 1: CORE MOVEMENT, AUTONOMOUS, SLOW MODE & SHOOTER ---
     private void handleDriverOneControls() {
-
-        // --- 1. SHOOTER CONTROL (MOVED TO GAMPAD 1 - Right Trigger) ---
-        boolean triggerHeld = gamepad1.right_trigger > SHOOTER_TRIGGER_THRESHOLD;
-        robotFunctions.setShooterPower(triggerHeld);
+        // --- 1. SHOOTER CONTROL (GamePad 1 - Right Trigger) ---
+        boolean shooterCommanded = gamepad1.right_trigger > TRIGGER_THRESHOLD;
+        robotFunctions.setShooterPower(shooterCommanded);
 
         // --- 2. DRIVE CONTROL ---
         if (!isAutomatedDrive) {
-            // SLOW MODE TOGGLE (Right Bumper)
             if (gamepad1.rightBumperWasPressed()) {
                 isSlowMode = !isSlowMode;
             }
 
             double driveMultiplier = isSlowMode ? slowModeMultiplier : 1.0;
 
-            // Drive Command
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * driveMultiplier, // Forward/Backward
-                    -gamepad1.left_stick_x * driveMultiplier, // Strafe Left/Right
-                    -gamepad1.right_stick_x * driveMultiplier, // Turn
-                    true // Robot Centric
+                    -gamepad1.left_stick_y * driveMultiplier,
+                    -gamepad1.left_stick_x * driveMultiplier,
+                    -gamepad1.right_stick_x * driveMultiplier,
+                    true
             );
         }
 
-        // --- 3. PATH FOLLOWING ---
-        // Start Path Following (A Button)
+        // --- 3. PATH FOLLOWING (Unmodified) ---
         if (gamepad1.aWasPressed()) {
             follower.followPath(pathChainSupplier.get());
             isAutomatedDrive = true;
         }
 
-        // Stop Automated Following (B Button or Path Done)
         if (isAutomatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
             follower.startTeleopDrive();
             isAutomatedDrive = false;
         }
 
-        // --- 4. SLOW MODE ADJUSTMENTS ---
-        // Increase/Decrease Slow Mode Multiplier
+        // --- 4. SLOW MODE ADJUSTMENTS (Unmodified) ---
         if (gamepad1.xWasPressed()) {
             slowModeMultiplier = Math.min(1.0, slowModeMultiplier + SLOW_MODE_MULTIPLIER_INCREMENT);
         }
@@ -138,16 +126,11 @@ public class teleTest extends OpMode {
         }
     }
 
-    // --- DRIVER 2: MANUAL TURRET & AUTO-AIM TOGGLE ---
-    private void handleDriverTwoControls() {
-        // --- 1. AUTO-AIM TOGGLE (Left Bumper) ---
-        if (gamepad2.left_bumper) {
-            isTurretAutoAimEnabled = !isTurretAutoAimEnabled;
-        }
+    // --- DRIVER 2: MANUAL TURRET & UTILITY CONTROLS ---
+    private void handleDriverTwoControls(boolean isG1Aiming) {
 
-        // --- 2. MANUAL TURRET CONTROL ---
-        if (!isTurretAutoAimEnabled) {
-            // Manual Turret Control (Right Stick X-axis)
+        // --- 1. MANUAL TURRET CONTROL (Only works when G1 is NOT aiming, i.e., turret is at 0) ---
+        if (!isG1Aiming) {
             double manualTurnInput = -gamepad2.right_stick_x;
 
             if (Math.abs(manualTurnInput) > MANUAL_TURRET_DEADZONE) {
@@ -159,22 +142,21 @@ public class teleTest extends OpMode {
             }
         }
 
-        // --- 3. MANUAL TURRET RESET (D-pad Down) ---
-        if (gamepad2.dpad_down && !isTurretAutoAimEnabled) {
+        // --- 2. MANUAL TURRET RESET (If G1 is not aiming, D-pad down enforces 0 ticks) ---
+        if (gamepad2.dpad_down && !isG1Aiming) {
             robotFunctions.resetTurret();
         }
 
-        // --- 4. (Optional) Slow Mode Adjustments (D-pad Up/Down) ---
+        // --- 3. SLOW MODE ADJUSTMENTS (Unmodified) ---
         if (gamepad2.dpad_up) {
             slowModeMultiplier = Math.min(1.0, slowModeMultiplier + SLOW_MODE_MULTIPLIER_INCREMENT);
         }
-        // Allows G2 to decrease the multiplier, but not conflict with the Turret Reset on D-pad Down
-        if (gamepad2.dpad_down && isTurretAutoAimEnabled) {
+        if (gamepad2.dpad_down && isG1Aiming) {
             slowModeMultiplier = Math.max(0.1, slowModeMultiplier - SLOW_MODE_MULTIPLIER_INCREMENT);
         }
     }
 
-    // --- TELEMETRY OUTPUT (UNMODIFIED) ---
+    // --- TELEMETRY OUTPUT ---
     private void updateTelemetry() {
         // Pedro Pathing Telemetry Panel (debug)
         telemetryM.debug("Robot Pose (X, Y, H)", follower.getPose().toString());
@@ -182,8 +164,8 @@ public class teleTest extends OpMode {
         telemetryM.debug("Automated Drive", isAutomatedDrive);
 
         // FTC Driver Station Telemetry
-        telemetry.addData("--- TURRET STATUS ---", "--------------------");
-        telemetry.addData("Auto-Aim", isTurretAutoAimEnabled ? "ON (Auto)" : "OFF (Manual)");
+        telemetry.addData("--- TURRET STATUS (MOMENTARY) ---", "--------------------");
+        telemetry.addData("Control Mode", robotFunctions.getTurretTicks() != 0 ? "AIMING / MANUAL" : "IDLE (0 Ticks)");
         telemetry.addData("Position (Ticks)", robotFunctions.getTurretTicks());
         telemetry.addData("Angle (Degrees)", "%.1f°", robotFunctions.getTurretAngleDegrees());
         telemetry.addData("Goal In Range", robotFunctions.isGoalInRange() ? "YES" : "NO");

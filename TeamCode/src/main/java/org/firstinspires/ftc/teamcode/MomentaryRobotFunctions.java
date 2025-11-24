@@ -4,33 +4,32 @@ import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-// Removed unused import: com.qualcomm.robotcore.util.ElapsedTime
 
 /**
- * Manages the hardware control and state for the robot's subsystems.
- * This class serves as the central interface between the OpMode and the
- * dedicated controllers (TurretController, ShooterController).
+ * Manages the hardware control for the Momentary Aim Turret System.
+ * Turret aims only when commanded, otherwise defaults to 0 ticks.
  */
-public class RobotFunctions {
+public class MomentaryRobotFunctions {
 
     // --- Turret Constants ---
     private static final double TURRET_POWER_DEFAULT = 0.3;
     private static final double TURRET_POWER_HOLD = 0.1;
     private static final int TURRET_TOLERANCE_TICKS = 10;
 
-    // Turret Conversion Ratios (Re-calculating on the fly based on best practice)
+    // Turret Conversion Ratios
     private static final double TICKS_PER_90_DEGREE = 470.0;
     private static final double RADIAN_TO_TICK_RATIO = (Math.PI / 2.0) / TICKS_PER_90_DEGREE;
     private static final double DEGREE_TO_TICK_RATIO = 90.0 / TICKS_PER_90_DEGREE;
 
     // --- Hardware and Controller Objects ---
-    private TurretController turretController;
-    private ShooterController shooterController; // NEW: Instance of the separate controller
+    // Uses the new MomentaryTurretController
+    private MomentaryTurretController turretController;
+    private ShooterController shooterController;
     private DcMotorEx turretMotor;
     private Follower follower;
 
     // --- State Tracking ---
-    private int lastTurretTargetPosition = 0; // Renamed for clarity
+    private int lastTurretTargetPosition = 0;
 
     //--------------------------- INITIALIZATION ---------------------------------------------------
 
@@ -39,8 +38,8 @@ public class RobotFunctions {
      */
     public void init(HardwareMap hardwareMap, Follower follower) {
         this.follower = follower;
-        this.turretController = new TurretController();
-        this.shooterController = new ShooterController(follower); // Initialize ShooterController
+        this.turretController = new MomentaryTurretController(); // Use the new controller
+        this.shooterController = new ShooterController(follower);
 
         // 1. Initialize Turret Motor
         turretMotor = hardwareMap.get(DcMotorEx.class, "turret");
@@ -51,26 +50,36 @@ public class RobotFunctions {
         turretMotor.setPower(TURRET_POWER_DEFAULT);
         lastTurretTargetPosition = 0;
 
-        // 2. Initialize Shooter Motor (Delegating hardware setup to the controller)
+        // 2. Initialize Shooter Motor
         shooterController.initShooter(hardwareMap);
     }
 
-    //--------------------------- TURRET CONTROL LOOP ----------------------------------------------
+    //--------------------------- TURRET CONTROL LOOP (MOMENTARY LOGIC) ----------------------------
 
     /**
-     * Updates the turret position based on auto-aim calculations.
+     * Updates the turret position based on the aim command.
+     * If aimCommanded is true, the turret tracks the goal.
+     * If aimCommanded is false, the turret defaults to 0 ticks.
+     * @param aimCommanded True if the driver is holding the aim button/trigger.
      */
-    public void updateTurret() {
-        // 1. Calculate Target
-        int targetPosition = turretController.calculateTurretPosition(follower.getPose());
+    public void updateTurret(boolean aimCommanded) {
+        int targetPosition;
 
-        // 2. Command Position: Only set the target if it has changed to minimize overhead.
+        if (aimCommanded) {
+            // Turret tracks the goal
+            targetPosition = turretController.calculateTurretPosition(follower.getPose());
+        } else {
+            // Turret returns to 0 ticks (center)
+            targetPosition = 0;
+        }
+
+        // 2. Command Position
         if (targetPosition != lastTurretTargetPosition) {
             turretMotor.setTargetPosition(targetPosition);
             lastTurretTargetPosition = targetPosition;
         }
 
-        // 3. Power Control: Use dynamic power to quickly reach the target and then hold position.
+        // 3. Power Control
         int currentPosition = turretMotor.getCurrentPosition();
         if (Math.abs(currentPosition - targetPosition) > TURRET_TOLERANCE_TICKS) {
             turretMotor.setPower(TURRET_POWER_DEFAULT);
@@ -79,22 +88,14 @@ public class RobotFunctions {
         }
     }
 
-    //--------------------------- SHOOTER CONTROL (PASS-THROUGH) -----------------------------------
+    //--------------------------- MANUAL/UTILITY METHODS -------------------------------------------
 
-    /**
-     * Updates the shooter motor power based on the trigger state, delegating
-     * calculation and control to the ShooterController.
-     * @param triggerHeld True if the driver is commanding the shooter to fire.
-     */
+    // NOTE: These methods use the same hardware names, but are part of the new class.
+
     public void setShooterPower(boolean triggerHeld) {
         shooterController.setShooterPower(triggerHeld);
     }
 
-    //--------------------------- TURRET UTILITIES & ACCESSORS -------------------------------------
-
-    /**
-     * Manually resets the turret to its center position (0 ticks).
-     */
     public void resetTurret() {
         turretMotor.setTargetPosition(0);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -102,10 +103,6 @@ public class RobotFunctions {
         lastTurretTargetPosition = 0;
     }
 
-    /**
-     * Manually overrides the turret's position.
-     * @param targetTicks The target position in motor ticks.
-     */
     public void setTurretManualPosition(int targetTicks) {
         if (targetTicks != lastTurretTargetPosition) {
             turretMotor.setTargetPosition(targetTicks);
@@ -114,39 +111,17 @@ public class RobotFunctions {
         }
     }
 
-    public double getTurretAngle() {
-        return turretMotor.getCurrentPosition() * RADIAN_TO_TICK_RATIO;
-    }
-
-    public int getTurretTicks() {
-        return turretMotor.getCurrentPosition();
-    }
-
+    // --- Accessors ---
+    public int getTurretTicks() { return turretMotor.getCurrentPosition(); }
     public double getTurretAngleDegrees() {
         return turretMotor.getCurrentPosition() * DEGREE_TO_TICK_RATIO;
     }
-
     public boolean isGoalInRange() {
         return turretController.isGoalInRange(follower.getPose());
     }
-
     public String getTurretDebugInfo() {
         return turretController.getDebugInfo(follower.getPose());
     }
-
-    // --- SHOOTER ACCESSORS (PASS-THROUGH) ---
-
-    /**
-     * @return The distance to the goal in inches.
-     */
-    public double getShooterDistanceToGoal() {
-        return shooterController.getDistanceToGoal();
-    }
-
-    /**
-     * @return The last power commanded to the shooter motor (0.0 if off).
-     */
-    public double getCommandedShooterPower() {
-        return shooterController.getCommandedPower();
-    }
+    public double getShooterDistanceToGoal() { return shooterController.getDistanceToGoal(); }
+    public double getCommandedShooterPower() { return shooterController.getCommandedPower(); }
 }
