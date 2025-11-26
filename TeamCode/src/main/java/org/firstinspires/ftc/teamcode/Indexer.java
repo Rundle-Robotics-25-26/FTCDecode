@@ -32,7 +32,7 @@ public class Indexer {
     private int sequencePhase = 0;
 
     // Movement parameters (adjust these based on testing)
-    private static final long BASE_MOVE_TIME = 800;  // ms
+    private static final long BASE_MOVE_TIME = 400;  // ms//was 800
     private static final long ARM_MOVE_TIME = 400;   // ms;
     private static final long SPINDEX_MOVE_TIME = 200;
     private static final long PHASE_DELAY = 50;      // ms between phases

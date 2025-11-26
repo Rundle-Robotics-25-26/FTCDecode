@@ -28,7 +28,7 @@ public class MomentaryTeleOp extends OpMode { // *** NEW CLASS NAME ***
 
     // --- FOLLOW, DRIVETRAIN & POSE ---
     private Follower follower;
-    public static Pose startingPose = new Pose(40, 9, Math.toRadians(90));
+    public static Pose startingPose = new Pose(96, 9, Math.toRadians(90));//change to 40
     private Supplier<PathChain> pathChainSupplier;
 
     // --- STATE MANAGEMENT ---
