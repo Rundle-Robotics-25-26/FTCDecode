@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+// --- NEW IMPORT: Added for the 10-second timer ---
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.RobotFunctions;
@@ -33,6 +35,13 @@ public class yummyteleop extends OpMode {
     private RobotFunctions robotFunctions;
     private boolean turretAutoAimEnabled = true;
     private boolean prevG2LeftBumper = false;
+
+    // --- NEW: Timer for 10-second auto-reset ---
+    private ElapsedTime turretResetTimer = new ElapsedTime();
+
+    // --- NEW: Define the goal position here in the TeleOp ---
+    // Assuming the Blue Alliance High Goal (6 inches from the left and 6 inches from the far end)
+    private final Pose HIGH_GOAL_TARGET_POSE = new Pose(6, 144 - 6, 0);
 
     // Starting pose on the field (adjust coordinates/heading as needed)
     private final Pose startingPose = new Pose(40, 9, Math.toRadians(90));
@@ -69,6 +78,14 @@ public class yummyteleop extends OpMode {
         // RobotFunctions manages turret/shooter higher-level functions and uses follower for field coordinates
         robotFunctions = new RobotFunctions();
         robotFunctions.init(hardwareMap, follower);
+
+        // Pass the target pose to the RobotFunctions class
+        // NOTE: This assumes you have a public setTargetPose(Pose target) method in RobotFunctions.java
+        robotFunctions.setTargetPose(HIGH_GOAL_TARGET_POSE);
+        telemetry.addData("Goal Target", "X: %.1f, Y: %.1f", HIGH_GOAL_TARGET_POSE.getX(), HIGH_GOAL_TARGET_POSE.getY());
+
+        // --- NEW: Start the reset timer when the OpMode initializes ---
+        turretResetTimer.reset();
     }
 
     @Override
@@ -80,6 +97,15 @@ public class yummyteleop extends OpMode {
     public void loop() {
         // Update pose & subsystems that rely on pose
         follower.update();
+
+        // --- NEW: 10-Second Auto-Reset Logic ---
+        if (turretResetTimer.seconds() >= 10.0) {
+            // Force reset the turret to 0 ticks (assuming 0 is the home/centered position)
+            turretAutoAimEnabled = false; // Temporarily disable auto-aim to enforce the reset
+            robotFunctions.setTurretManualPosition(0); // Send command for 0 ticks
+            turretResetTimer.reset(); // Restart the timer
+            telemetry.addLine("!!! Turret 10s Auto-Reset Triggered (0 Ticks) !!!");
+        }
 
         // Drive (use pedropathing teleop drive so position is tracked)
         follower.setTeleOpDrive(
@@ -168,7 +194,7 @@ public class yummyteleop extends OpMode {
 
         // Turret handling
         if (turretAutoAimEnabled) {
-            // RobotFunctions uses follower's pose internally to compute aiming
+            // RobotFunctions uses the target pose set in init() internally to compute aiming
             robotFunctions.updateTurret();
         } else {
             // Manual turret control with gamepad2 right stick (small deadzone)
@@ -191,6 +217,9 @@ public class yummyteleop extends OpMode {
         telemetry.addData("Turret Ticks", robotFunctions.getTurretTicks());
         telemetry.addData("Turret Angle", "%.1f°", robotFunctions.getTurretAngleDegrees());
         telemetry.addData("Shooter Power", "%.2f", shooter.getPower());
+        // --- NEW TELEMETRY: Show the timer countdown ---
+        telemetry.addData("Reset Timer", "%.1f / 10.0s", turretResetTimer.seconds());
+
 
         telemetry.update();
     }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -32,6 +33,9 @@ public class RobotFunctions {
     // --- State Tracking ---
     private int lastTurretTargetPosition = 0; // Renamed for clarity
 
+    // --- NEW: Field to hold the dynamic goal pose ---
+    private Pose targetPose;
+
     //--------------------------- INITIALIZATION ---------------------------------------------------
 
     /**
@@ -53,6 +57,22 @@ public class RobotFunctions {
 
         // 2. Initialize Shooter Motor (Delegating hardware setup to the controller)
         shooterController.initShooter(hardwareMap);
+    }
+
+    //--------------------------- NEW: GOAL POSE SETTER --------------------------------------------
+
+    /**
+     * Sets the field coordinate of the goal target and passes it to the TurretController.
+     * This method resolves the "no set target pose" error in the TeleOp.
+     * @param target The field Pose of the high goal.
+     */
+    public void setTargetPose(Pose target) {
+        this.targetPose = target;
+        // Pass the pose to the controller so it can use it for calculations
+        // NOTE: This assumes TurretController.java has a public setGoalPose(Pose) method.
+        if (turretController != null) {
+            turretController.setGoalPose(target);
+        }
     }
 
     //--------------------------- TURRET CONTROL LOOP ----------------------------------------------
