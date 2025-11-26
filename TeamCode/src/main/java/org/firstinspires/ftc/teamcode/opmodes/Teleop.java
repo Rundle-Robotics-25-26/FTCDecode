@@ -220,7 +220,7 @@ public class Teleop extends OpMode {
     }
 
     public void Intake(double power) {
-        LeftServo.setPower(power);
-        RightServo.setPower(-power);
+        LeftServo.setPower(-power);
+        RightServo.setPower(power);
     }
 }
