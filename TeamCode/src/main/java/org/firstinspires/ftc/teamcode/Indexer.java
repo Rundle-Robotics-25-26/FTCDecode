@@ -35,6 +35,7 @@ public class Indexer {
     private static final long BASE_MOVE_TIME = 400;  // ms//was 800
     private static final long ARM_MOVE_TIME = 400;   // ms;
     private static final long SPINDEX_MOVE_TIME = 200;
+    private static final long ROTATE_MOVE_TIME = 500;
     private static final long PHASE_DELAY = 50;      // ms between phases
     private static final long AUTO_WAIT_TIME = 1000; // ms to wait between open and close
 
@@ -119,6 +120,7 @@ public class Indexer {
 
     public void rotateSpindexer(boolean clockwise, Spindexer spindexer) {
         isMovingSpindexer = true;
+        sequenceStartTime = System.currentTimeMillis();
         if (clockwise) {
             spindexer.rotateClockwise();
         } else {
@@ -151,14 +153,18 @@ public class Indexer {
             telemetry.addData("Status: ", "Still moving to blocking position");
             return;
         }
-
+        /*
         if (spindexer.spindexer.isBusy()) {
             telemetry.addData("Status: ", "Spindexer is currently busy");
             return;
         }
+        */
 
-        // spindexer isn't already moving
-        if (isMovingSpindexer) {
+
+        // spindexer isn't already moving (HOPEFULLY)
+
+        long elapsed = System.currentTimeMillis() - sequenceStartTime;
+        if (isMovingSpindexer && elapsed > ROTATE_MOVE_TIME) {
             stopSpindexer();
             telemetry.addData("Status: ", "Stopping spindexer");
         } else {
