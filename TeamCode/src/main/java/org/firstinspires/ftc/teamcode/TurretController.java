@@ -13,8 +13,8 @@ public class TurretController {
     // A constant representing 90 degrees in radians (PI/2) for clarity
     private static final double DEGREE_90_IN_RADIANS = Math.PI / 2.0;
 
-    // Turret's target location on the field (e.g., a goal)
-    private final Pose GOAL_POSE = new Pose(0.0, 136.0, 0.0);
+    // --- MODIFIED: GOAL_POSE is now a dynamic field ---
+    private Pose goalPose = new Pose(0.0, 136.0, 0.0); // Turret's target location on the field (Default)
 
     // Motor limits (470 ticks corresponds to 90 degrees/PI/2 radians)
     private final int MAX_RIGHT_TICKS = 470;
@@ -24,8 +24,14 @@ public class TurretController {
     // Ticks / Radian = (470 ticks) / (PI/2 radians)
     private final double TICKS_PER_RADIAN = MAX_RIGHT_TICKS / DEGREE_90_IN_RADIANS;
 
-    // --- Constructor ---
-    // Removed the explicit public constructor as it's empty and unnecessary in this case.
+    // --- NEW: Setter method to update the goal position (called from RobotFunctions) ---
+    /**
+     * Sets the new target goal position on the field.
+     * @param pose The new Pose of the goal target.
+     */
+    public void setGoalPose(Pose pose) {
+        this.goalPose = pose;
+    }
 
     // --- Calculation Methods ---
 
@@ -36,8 +42,9 @@ public class TurretController {
      * @return The absolute angle to the goal in radians.
      */
     public double calculateAbsoluteAngle(Pose robotPose) {
-        double deltaX = GOAL_POSE.getX() - robotPose.getX();
-        double deltaY = GOAL_POSE.getY() - robotPose.getY();
+        // MODIFIED: References the dynamic 'goalPose' field
+        double deltaX = goalPose.getX() - robotPose.getX();
+        double deltaY = goalPose.getY() - robotPose.getY();
         // Uses Math.atan2(dx, dy) which is relative to the positive Y axis (vertical).
         return Math.atan2(deltaX, deltaY);
     }
@@ -75,13 +82,7 @@ public class TurretController {
      * @return The normalized angle in radians.
      */
     private double normalizeAngle(double angle) {
-        // Optimized normalization using the Math.IEEEremainder function (preferred for speed)
-        // or a similar check. Since the original implementation used a while loop,
-        // we'll maintain the logic for maximum compatibility and clarity, but with a slight change.
-
-        // A more canonical and efficient way to normalize a radian angle to [-pi, pi]
-        // without a loop is using the formula:
-        // angle - 2 * PI * floor((angle + PI) / (2 * PI))
+        // Canonical way to normalize a radian angle to [-pi, pi]
         return angle - 2 * Math.PI * Math.floor((angle + Math.PI) / (2 * Math.PI));
     }
 
