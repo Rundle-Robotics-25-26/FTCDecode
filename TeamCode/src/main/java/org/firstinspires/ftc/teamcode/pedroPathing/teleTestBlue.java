@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 
 @Configurable
 @TeleOp(name = "TeleOp Test Drive - G1 Core")
-public class teleTest extends OpMode {
+public class teleTestBlue extends OpMode {
 
     // --- CONFIGURABLE CONSTANTS ---
     public static final double SLOW_MODE_MULTIPLIER_INCREMENT = 0.25;
