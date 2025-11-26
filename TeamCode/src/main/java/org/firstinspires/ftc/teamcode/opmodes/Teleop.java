@@ -84,15 +84,16 @@ public class Teleop extends OpMode {
         driveMecanum(drive, strafe, rotate);
 
         // ==== Intake ====
-        if (gamepad1.right_trigger > 0.1) {  // Adjust threshold as needed
+        // Use trigger value for proportional control, keep small deadzone
+        double rt = gamepad1.right_trigger;
+        if (rt > 0.05) {
+            // change: always run intake at full speed when trigger is pressed at all
+            Intake(-1.0); // preserve original negative direction used previously
+        } else if (gamepad1.dpad_up) {
+            // manual full-speed reverse/intake
             Intake(1);
         } else {
             Intake(0);  // Stop
-        }
-        Intake(0);
-
-        if(gamepad1.dpad_up) {
-            Intake(-1);
         }
 
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
@@ -187,6 +188,9 @@ public class Teleop extends OpMode {
             indexer.spindex(gamepad1.left_bumper, spindexer);
         }
 
+        telemetry.addData("Intake RT", "%.2f", rt);
+        telemetry.addData("LeftServo Power", LeftServo.getPower());
+        telemetry.addData("RightServo Power", RightServo.getPower());
         telemetry.update();
     }
 

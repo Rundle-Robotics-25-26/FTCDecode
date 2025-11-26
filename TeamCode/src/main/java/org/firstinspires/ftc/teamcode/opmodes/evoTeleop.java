@@ -109,8 +109,8 @@ public class evoTeleop extends OpMode {
         // ==== Intake ====
         if (gamepad1.right_trigger > 0.1) {
             Intake(1);
-        } else if (gamepad1.dpad_up) {
-            Intake(-1);
+            // change: always run intake at full speed when trigger is pressed at all
+            Intake(1.0); // this file used positive intake when trigger was proportional
         } else {
             Intake(0);
         }

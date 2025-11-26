@@ -92,7 +92,8 @@ public class yummyteleop extends OpMode {
         // Intake controls (original behaviour)
         if (gamepad1.right_trigger > 0.1) {
             Intake(1);
-        } else if (gamepad1.dpad_up) {
+            // change: always run intake at full speed when trigger is pressed at all
+            Intake(1.0); // this file used positive intake when trigger was proportional
             Intake(-1);
         } else {
             Intake(0);
