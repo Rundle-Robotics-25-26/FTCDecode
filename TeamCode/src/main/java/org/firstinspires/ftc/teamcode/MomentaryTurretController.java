@@ -13,7 +13,7 @@ public class MomentaryTurretController {
     private static final int MAX_LEFT_TICKS = -470;
 
     // --- Target Location (Fixed Goal) ---
-    private static final Pose TARGET_POSE = new Pose(10, 136, 0);
+    private static final Pose TARGET_POSE = new Pose(0, 136, 0);
 
     // --- Conversion Factors ---
     private static final double TICK_PER_RADIAN = 470.0 / (Math.PI / 2.0);
