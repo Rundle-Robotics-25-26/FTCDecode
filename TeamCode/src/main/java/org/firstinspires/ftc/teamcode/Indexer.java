@@ -160,6 +160,7 @@ public class Indexer {
         // spindexer isn't already moving
         if (isMovingSpindexer) {
             stopSpindexer();
+            telemetry.addData("Status: ", "Stopping spindexer");
         } else {
             telemetry.addData("Status: ", "Starting to rotate spindexer");
             rotateSpindexer(clockwise, spindexer);
