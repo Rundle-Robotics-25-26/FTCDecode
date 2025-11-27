@@ -24,8 +24,6 @@ import java.util.function.Supplier;
 public class teleTestBlue extends OpMode {
 
     // --- CONFIGURABLE CONSTANTS ---
-    public static final double SLOW_MODE_MULTIPLIER_INCREMENT = 0.25;
-    public static final double DEFAULT_SLOW_MODE_MULTIPLIER = 0.5;
     public static final double SHOOTER_TRIGGER_THRESHOLD = 0.1;
     public static final double INTAKE_DEADZONE = 0.05;
 
@@ -37,8 +35,6 @@ public class teleTestBlue extends OpMode {
     // --- STATE MANAGEMENT ---
     private RobotFunctions robotFunctions;
     private boolean isAutomatedDrive = false;
-    private double slowModeMultiplier = DEFAULT_SLOW_MODE_MULTIPLIER;
-    private boolean isSlowMode = false;
 
     // --- INTAKE, SPINDEXER & INDEXER ---
     private CRServo LeftServo, RightServo;
@@ -85,7 +81,7 @@ public class teleTestBlue extends OpMode {
         // --- INDEXER SETUP ---
         indexer.Init(hardwareMap, telemetry);
 
-        // Define PathChain lazily.
+        // Define PathChain for autonomous path following
         pathChainSupplier = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
@@ -105,124 +101,91 @@ public class teleTestBlue extends OpMode {
         follower.update();
         telemetryM.update();
 
-        // 2. GamePad Input Handling (Driver 1 - Core Movement & Systems)
-        handleDriverOneControls();
+        // 2. GamePad Input Handling
+        handleControls();
 
-        // 3. Indexer Update (needs to run every loop)
+        // 3. Indexer Update
         indexer.Update(gamepad1.circle);
 
-        // 4. Spindexer Update (needs to run every loop)
+        // 4. Spindexer Update
         indexer.spindexerUpdate(spindexerDirection, spindexer);
 
         // 5. Telemetry Output
         updateTelemetry();
     }
 
-    // --- DRIVER 1: CORE MOVEMENT, AUTONOMOUS, SLOW MODE & ALL SYSTEMS ---
-    private void handleDriverOneControls() {
+    // --- CONTROLS ---
+    private void handleControls() {
 
-        // --- 1. SHOOTER CONTROL (Left Trigger) ---
+        // --- 1. SHOOTER ---
         boolean shooterOn = gamepad1.left_trigger > SHOOTER_TRIGGER_THRESHOLD;
         robotFunctions.setShooterPower(shooterOn);
 
-        // --- 2. DRIVE CONTROL ---
+        // --- 2. DRIVE ---
         if (!isAutomatedDrive) {
-            // SLOW MODE TOGGLE (Right Bumper)
-            if (gamepad1.rightBumperWasPressed()) {
-                isSlowMode = !isSlowMode;
-            }
-
-            double driveMultiplier = isSlowMode ? slowModeMultiplier : 1.0;
-
-            // Drive Command using Pedro Pathing system
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * driveMultiplier, // Forward/Backward
-                    -gamepad1.left_stick_x * driveMultiplier, // Strafe Left/Right
-                    -gamepad1.right_stick_x * driveMultiplier, // Turn
-                    true // Robot Centric
+                    -gamepad1.left_stick_y, // Y axis does X (strafe)
+                    -gamepad1.left_stick_x, // X axis does Y (forward/back) and reversed
+                    -gamepad1.right_stick_x, // Turn
+                    true // Field centric
             );
         }
 
-        // --- 3. INTAKE CONTROL ---
-        // Right Trigger for intake
+        // --- 3. INTAKE ---
         double intakePower = gamepad1.right_trigger > INTAKE_DEADZONE ? -1.0 : 0;
 
-        // Dpad Up for reverse intake
         if (gamepad1.dpad_up) {
-            intakePower = 1.0; // Reverse intake
+            intakePower = 1.0;
         }
 
         Intake(intakePower);
 
-        // --- 4. SPINDEXER CONTROL (Bumpers) ---
+        // --- 4. SPINDEXER ---
         if (gamepad1.left_bumper || gamepad1.right_bumper) {
             spindexerDirection = gamepad1.dpad_left;
             indexer.spindex(gamepad1.left_bumper, spindexer);
         }
-
-        // --- 5. AUTO DRIVE CONTROL (X Button) ---
-        if (gamepad1.xWasPressed()) {
-            follower.followPath(pathChainSupplier.get());
-            isAutomatedDrive = true;
-        }
-
-        // Stop Automated Following (Y Button or Path Done)
-        if (isAutomatedDrive && (gamepad1.yWasPressed() || !follower.isBusy())) {
-            follower.startTeleopDrive();
-            isAutomatedDrive = false;
-        }
-
-        // --- 6. SLOW MODE ADJUSTMENTS (A and B Buttons) ---
-        if (gamepad1.aWasPressed()) {
-            slowModeMultiplier = Math.min(1.0, slowModeMultiplier + SLOW_MODE_MULTIPLIER_INCREMENT);
-        }
-        if (gamepad1.bWasPressed()) {
-            slowModeMultiplier = Math.max(0.1, slowModeMultiplier - SLOW_MODE_MULTIPLIER_INCREMENT);
-        }
     }
 
-    // --- INTAKE CONTROL ---
+    // --- INTAKE ---
     public void Intake(double power) {
         LeftServo.setPower(power);
         RightServo.setPower(-power);
     }
 
-    // --- TELEMETRY OUTPUT (CLEANED UP) ---
+    // --- TELEMETRY ---
     private void updateTelemetry() {
-        // Pedro Pathing Telemetry Panel (debug)
+        // Pedro Pathing Telemetry Panel
         telemetryM.debug("Robot Pose (X, Y, H)", follower.getPose().toString());
         telemetryM.debug("Robot Velocity", follower.getVelocity().toString());
-        telemetryM.debug("Automated Drive", isAutomatedDrive);
 
-        // --- SHOOTER STATUS ---
-        telemetry.addData("--- SHOOTER STATUS ---", "--------------------");
+        // --- SHOOTER ---
+        telemetry.addData("--- SHOOTER ---", "--------------------");
         telemetry.addData("Distance to Goal", "%.1f in", robotFunctions.getShooterDistanceToGoal());
         telemetry.addData("Commanded Power", "%.2f", robotFunctions.getCommandedShooterPower());
         telemetry.addData("Shooter Active", gamepad1.left_trigger > SHOOTER_TRIGGER_THRESHOLD ? "YES" : "NO");
 
-        // --- DRIVETRAIN STATUS ---
-        telemetry.addData("--- DRIVETRAIN STATUS ---", "--------------------");
-        telemetry.addData("Current Pose (Field)", "X: %.1f, Y: %.1f, Heading: %.1f°",
+        // --- DRIVETRAIN ---
+        telemetry.addData("--- DRIVE ---", "--------------------");
+        telemetry.addData("Current Pose", "X: %.1f, Y: %.1f, Heading: %.1f°",
                 follower.getPose().getX(),
                 follower.getPose().getY(),
                 Math.toDegrees(follower.getPose().getHeading()));
-        telemetry.addData("Slow Mode", isSlowMode ? "ON" : "OFF");
-        telemetry.addData("Slow Multiplier", "%.2f", slowModeMultiplier);
+        telemetry.addData("Drive Mode", "FIELD CENTRIC");
 
-        // --- INTAKE & SPINDEXER STATUS ---
+        // --- INTAKE & SPINDEXER ---
         telemetry.addData("--- INTAKE & SPINDEXER ---", "--------------------");
         telemetry.addData("Intake Power", "%.2f", LeftServo.getPower());
         telemetry.addData("Spinner Position", spinner.getCurrentPosition());
         telemetry.addData("Is Spindexer busy?", spindexer.spindexer.isBusy());
 
-        // --- CONTROLS INFO ---
+        // --- CONTROLS ---
         telemetry.addData("--- CONTROLS ---", "--------------------");
-        telemetry.addData("Drive", "Left Stick: Move, Right Stick: Rotate");
+        telemetry.addData("Drive", "Left Stick: Move, Right Stick: Turn");
         telemetry.addData("Shooter", "Left Trigger: Shoot");
         telemetry.addData("Intake", "Right Trigger: Run, Dpad Up: Reverse");
         telemetry.addData("Spindexer", "Bumpers: Activate");
-        telemetry.addData("Auto Drive", "X: Start Path, Y: Cancel");
-        telemetry.addData("Slow Mode", "Right Bumper: Toggle, A/B: Adjust");
+        telemetry.addData("Indexer", "Circle: Activate");
 
         telemetry.update();
     }
