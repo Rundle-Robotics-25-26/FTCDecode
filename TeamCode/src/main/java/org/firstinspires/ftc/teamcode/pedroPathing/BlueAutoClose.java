@@ -177,11 +177,11 @@ public class BlueAutoClose extends OpMode {
         buildPaths();
         follower.setStartingPose(startPose);
 
-        spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinner.setTargetPosition(0);
-        spinner.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinner.setPower(0.3); // Holding power to maintain position
-        spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        spinner.setTargetPosition(0);
+//        spinner.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        spinner.setPower(0.3); // Holding power to maintain position
+//        spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         spinner = hardwareMap.get(DcMotor.class, "motor2");
         LeftServo = hardwareMap.get(CRServo.class, "LeftServo");
         RightServo = hardwareMap.get(CRServo.class, "RightServo");
