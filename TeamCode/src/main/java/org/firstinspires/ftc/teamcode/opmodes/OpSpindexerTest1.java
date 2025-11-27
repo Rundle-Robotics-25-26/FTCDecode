@@ -14,7 +14,7 @@ public class OpSpindexerTest1 extends OpMode {
     private final Indexer indexer = new Indexer();
     boolean putSpindexerDown = false;
     DcMotor spindexerMotor;
-
+    boolean spindexerDirection = true;
     @Override
     public void init(){
         spindexer.dataInit(hardwareMap);
@@ -31,8 +31,10 @@ public class OpSpindexerTest1 extends OpMode {
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
         // indexer
         if (gamepad1.dpad_left || gamepad1.dpad_right) {
+            spindexerDirection = gamepad1.dpad_left;
             indexer.spindex(gamepad1.dpad_left, spindexer);
         }
+        indexer.spindexerUpdate(spindexerDirection, spindexer);
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);

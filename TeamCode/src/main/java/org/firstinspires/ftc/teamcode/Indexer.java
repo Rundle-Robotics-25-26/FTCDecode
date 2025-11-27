@@ -29,6 +29,8 @@ public class Indexer {
     private enum State { IDLE, IN_SEQUENCE, WAITING }
     private State currentState = State.IDLE;
     private long sequenceStartTime = 0;
+    private long movingStartTime = 0;
+    private long resetStartTime = 0;
     private int sequencePhase = 0;
 
     // Movement parameters (adjust these based on testing)
@@ -38,6 +40,7 @@ public class Indexer {
     private static final long ROTATE_MOVE_TIME = 500;
     private static final long PHASE_DELAY = 50;      // ms between phases
     private static final long AUTO_WAIT_TIME = 1000; // ms to wait between open and close
+    private static final long RESET_TIME = 5000;
 
     // Start and target positions for smooth movement
     private double baseStartPos, armStartPos;
@@ -48,6 +51,7 @@ public class Indexer {
     private boolean autoCycleEnabled = false;
     private boolean isSpindexerIndexed = false;
     private boolean isMovingSpindexer = false;
+    private boolean resetting = false;
 
     public void Init(HardwareMap hardware, Telemetry tele) {
         hardwareMap = hardware;
@@ -120,7 +124,7 @@ public class Indexer {
 
     public void rotateSpindexer(boolean clockwise, Spindexer spindexer) {
         isMovingSpindexer = true;
-        sequenceStartTime = System.currentTimeMillis();
+        movingStartTime = System.currentTimeMillis();
         if (clockwise) {
             spindexer.rotateClockwise();
         } else {
@@ -134,7 +138,20 @@ public class Indexer {
         baseIndexer.setPosition(BASE_START);
         armIndexer.setPosition(ARM_START);
     }
-
+    public void spindexerUpdate(boolean clockwise, Spindexer spindexer) {
+        if (isInBlockingPosition()) {
+            if (isMovingSpindexer) {
+                long movingElapsed = System.currentTimeMillis() - movingStartTime;
+                if (movingElapsed > ROTATE_MOVE_TIME) {
+                    stopSpindexer();
+                }
+            } else {
+                rotateSpindexer(clockwise, spindexer);
+            }
+        } else {
+            telemetry.addData("Status: ", "Still moving to blocking position");
+        }
+    }
     public void spindex(boolean clockwise, Spindexer spindexer) {
         // Is indexer shooting?
         if (!isReadyToSpindex()) {
@@ -146,30 +163,6 @@ public class Indexer {
         if (!isSpindexerIndexed) {
             telemetry.addData("Status: ", "Starting indexer moving to blocking position");
             initializeBlockPosition();
-            return;
-        }
-
-        if (!isInBlockingPosition()) {
-            telemetry.addData("Status: ", "Still moving to blocking position");
-            return;
-        }
-        /*
-        if (spindexer.spindexer.isBusy()) {
-            telemetry.addData("Status: ", "Spindexer is currently busy");
-            return;
-        }
-        */
-
-
-        // spindexer isn't already moving (HOPEFULLY)
-
-        long elapsed = System.currentTimeMillis() - sequenceStartTime;
-        if (isMovingSpindexer && elapsed > ROTATE_MOVE_TIME) {
-            stopSpindexer();
-            telemetry.addData("Status: ", "Stopping spindexer");
-        } else {
-            telemetry.addData("Status: ", "Starting to rotate spindexer");
-            rotateSpindexer(clockwise, spindexer);
         }
     }
 
