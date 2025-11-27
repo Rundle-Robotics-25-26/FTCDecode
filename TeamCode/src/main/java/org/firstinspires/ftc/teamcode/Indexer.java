@@ -39,7 +39,7 @@ public class Indexer {
     private static final long SPINDEX_MOVE_TIME = 200;
     private static final long ROTATE_MOVE_TIME = 500;
     private static final long PHASE_DELAY = 50;      // ms between phases
-    private static final long AUTO_WAIT_TIME = 1000; // ms to wait between open and close
+    private static final long AUTO_WAIT_TIME = 200; // ms to wait between open and close
     private static final long RESET_TIME = 5000;
 
     // Start and target positions for smooth movement

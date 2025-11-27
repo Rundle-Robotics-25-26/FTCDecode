@@ -18,11 +18,12 @@ public class ShooterController {
     // Lookup table: {distance_in_inches, power}
     private final double[][] POWER_CURVE = {
             {0.0, -0.3},
-            {20.0, -0.4},
+            {20.0, -0.45},
             {40.0, -0.5},
             {60.0, -0.55},
-            {80.0, -0.6},
-            {100.0, -0.75}
+            {82.0, -0.6},
+            {120.0, -0.75},
+            {130.0, -0.8}
     };
 
     // --- Hardware and State ---
