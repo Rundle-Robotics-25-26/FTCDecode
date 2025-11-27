@@ -31,7 +31,7 @@ public abstract class ShooterController {
         // Since both controllers use the same physical motor, we only initialize it once.
         if (shooterMotor == null) {
             shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
-            shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            shooterMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooterMotor.setPower(0.0);
         }
