@@ -26,7 +26,7 @@ public class Indexer {
     final double BASE_SPINDEX = 0.2628;
 
     // New movement system variables
-    private enum State { IDLE, IN_SEQUENCE, WAITING }
+    public enum State { IDLE, IN_SEQUENCE, WAITING }
     private State currentState = State.IDLE;
     private long sequenceStartTime = 0;
     private long movingStartTime = 0;
@@ -52,6 +52,8 @@ public class Indexer {
     private boolean isSpindexerIndexed = false;
     private boolean isMovingSpindexer = false;
     private boolean spinAfterShoot = false;
+
+    public State shooterSpinMacroState = State.IDLE;
 
     public void Init(HardwareMap hardware, Telemetry tele) {
         hardwareMap = hardware;
@@ -135,6 +137,7 @@ public class Indexer {
     public void stopSpindexer() {
         isMovingSpindexer = false;
         isSpindexerIndexed = false;
+        shooterSpinMacroState = State.WAITING;
         baseIndexer.setPosition(BASE_START);
         armIndexer.setPosition(ARM_START);
     }
@@ -169,6 +172,7 @@ public class Indexer {
     }
 
     public void ShootAndSpin() {
+        shooterSpinMacroState = State.IN_SEQUENCE;
         Update(true);
         spinAfterShoot = true;
     }
@@ -367,4 +371,5 @@ public class Indexer {
             startAutoCycle();
         }
     }
+
 }
