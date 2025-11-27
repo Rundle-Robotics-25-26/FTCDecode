@@ -17,12 +17,12 @@ public class ShooterController {
 
     // Lookup table: {distance_in_inches, power}
     private final double[][] POWER_CURVE = {
-            {0.0, 0.3},
-            {20.0, 0.4},
-            {40.0, 0.5},
-            {60.0, 0.55},
-            {80.0, 0.6},
-            {100.0, 0.7}
+            {0.0, -0.3},
+            {20.0, -0.4},
+            {40.0, -0.5},
+            {60.0, -0.55},
+            {80.0, -0.6},
+            {100.0, -0.75}
     };
 
     // --- Hardware and State ---
@@ -41,7 +41,7 @@ public class ShooterController {
      * Initializes the shooter motor hardware.
      */
     public void initShooter(HardwareMap hardwareMap) {
-        shooterMotor = hardwareMap.get(DcMotorEx.class, "motor2");
+        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooter");
         shooterMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         shooterMotor.setPower(0.0);

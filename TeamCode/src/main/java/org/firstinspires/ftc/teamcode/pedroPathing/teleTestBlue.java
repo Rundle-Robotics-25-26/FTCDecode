@@ -21,8 +21,6 @@ public class teleTestBlue extends OpMode {
 
     // --- CONFIGURABLE CONSTANTS ---
     public static final double SLOW_MODE_MULTIPLIER_INCREMENT = 0.25;
-    public static final double MANUAL_TURRET_TICK_RATE = 15.0;
-    public static final double MANUAL_TURRET_DEADZONE = 0.1;
     public static final double DEFAULT_SLOW_MODE_MULTIPLIER = 0.5;
     public static final double SHOOTER_TRIGGER_THRESHOLD = 0.1;
 
@@ -34,7 +32,6 @@ public class teleTestBlue extends OpMode {
     // --- STATE MANAGEMENT ---
     private RobotFunctions robotFunctions;
     private boolean isAutomatedDrive = false;
-    private boolean isTurretAutoAimEnabled = true;
     private double slowModeMultiplier = DEFAULT_SLOW_MODE_MULTIPLIER;
     private boolean isSlowMode = false;
 
@@ -54,6 +51,11 @@ public class teleTestBlue extends OpMode {
         // Initialize ALL Systems (Turret and Shooter)
         robotFunctions = new RobotFunctions();
         robotFunctions.init(hardwareMap, follower);
+
+        // --- TURRET MODIFICATION: Set and hold position to 0 ticks ---
+        // This command will move the turret to the center (0 ticks) and keep the motor
+        // active to hold that position throughout the OpMode.
+        robotFunctions.resetTurret();
 
         // Define PathChain lazily.
         pathChainSupplier = () -> follower.pathBuilder()
@@ -75,18 +77,13 @@ public class teleTestBlue extends OpMode {
         follower.update();
         telemetryM.update();
 
-        // 2. Turret Auto-Aim Update (if enabled)
-        if (isTurretAutoAimEnabled) {
-            robotFunctions.updateTurret();
-        }
-
-        // 3. GamePad Input Handling (Driver 1 - Core Movement & Firing)
+        // 2. GamePad Input Handling (Driver 1 - Core Movement & Firing)
         handleDriverOneControls();
 
-        // 4. GamePad Input Handling (Driver 2 - Precision/Manual Turret)
-        handleDriverTwoControls();
+        // Removed: Driver 2 Turret controls (since turret is now locked)
+        // Removed: Turret Auto-Aim Update
 
-        // 5. Telemetry Output
+        // 3. Telemetry Output
         updateTelemetry();
     }
 
@@ -139,55 +136,18 @@ public class teleTestBlue extends OpMode {
     }
 
     // --- DRIVER 2: MANUAL TURRET & AUTO-AIM TOGGLE ---
+    // Removed all content related to manual turret control.
     private void handleDriverTwoControls() {
-        // --- 1. AUTO-AIM TOGGLE (Left Bumper) ---
-        if (gamepad2.left_bumper) {
-            isTurretAutoAimEnabled = !isTurretAutoAimEnabled;
-        }
-
-        // --- 2. MANUAL TURRET CONTROL ---
-        if (!isTurretAutoAimEnabled) {
-            // Manual Turret Control (Right Stick X-axis)
-            double manualTurnInput = -gamepad2.right_stick_x;
-
-            if (Math.abs(manualTurnInput) > MANUAL_TURRET_DEADZONE) {
-                int currentTicks = robotFunctions.getTurretTicks();
-                int tickChange = (int)(manualTurnInput * MANUAL_TURRET_TICK_RATE);
-                int newTicks = currentTicks + tickChange;
-
-                robotFunctions.setTurretManualPosition(newTicks);
-            }
-        }
-
-        // --- 3. MANUAL TURRET RESET (D-pad Down) ---
-        if (gamepad2.dpad_down && !isTurretAutoAimEnabled) {
-            robotFunctions.resetTurret();
-        }
-
-        // --- 4. (Optional) Slow Mode Adjustments (D-pad Up/Down) ---
-        if (gamepad2.dpad_up) {
-            slowModeMultiplier = Math.min(1.0, slowModeMultiplier + SLOW_MODE_MULTIPLIER_INCREMENT);
-        }
-        // Allows G2 to decrease the multiplier, but not conflict with the Turret Reset on D-pad Down
-        if (gamepad2.dpad_down && isTurretAutoAimEnabled) {
-            slowModeMultiplier = Math.max(0.1, slowModeMultiplier - SLOW_MODE_MULTIPLIER_INCREMENT);
-        }
+        // No turret logic here. D2 controls are effectively disabled.
+        // The turret is held at 0 ticks by the resetTurret() call in init().
     }
 
-    // --- TELEMETRY OUTPUT (UNMODIFIED) ---
+    // --- TELEMETRY OUTPUT (CLEANED UP) ---
     private void updateTelemetry() {
         // Pedro Pathing Telemetry Panel (debug)
         telemetryM.debug("Robot Pose (X, Y, H)", follower.getPose().toString());
         telemetryM.debug("Robot Velocity", follower.getVelocity().toString());
         telemetryM.debug("Automated Drive", isAutomatedDrive);
-
-        // FTC Driver Station Telemetry
-        telemetry.addData("--- TURRET STATUS ---", "--------------------");
-        telemetry.addData("Auto-Aim", isTurretAutoAimEnabled ? "ON (Auto)" : "OFF (Manual)");
-        telemetry.addData("Position (Ticks)", robotFunctions.getTurretTicks());
-        telemetry.addData("Angle (Degrees)", "%.1f°", robotFunctions.getTurretAngleDegrees());
-        telemetry.addData("Goal In Range", robotFunctions.isGoalInRange() ? "YES" : "NO");
-        telemetry.addData("Turret Debug", robotFunctions.getTurretDebugInfo());
 
         // --- SHOOTER STATUS ---
         telemetry.addData("--- SHOOTER STATUS ---", "--------------------");
