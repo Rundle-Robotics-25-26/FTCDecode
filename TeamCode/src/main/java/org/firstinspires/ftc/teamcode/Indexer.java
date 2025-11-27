@@ -51,7 +51,7 @@ public class Indexer {
     private boolean autoCycleEnabled = false;
     private boolean isSpindexerIndexed = false;
     private boolean isMovingSpindexer = false;
-    private boolean resetting = false;
+    private boolean spinAfterShoot = false;
 
     public void Init(HardwareMap hardware, Telemetry tele) {
         hardwareMap = hardware;
@@ -152,20 +152,34 @@ public class Indexer {
             telemetry.addData("Status: ", "Still moving to blocking position");
         }
     }
-    public void spindex(boolean clockwise, Spindexer spindexer) {
+    public boolean spindex(boolean clockwise, Spindexer spindexer) {
         // Is indexer shooting?
         if (!isReadyToSpindex()) {
             telemetry.addData("Status: ", "Must wait for indexer to be idle to spindex.");
-            return;
+            return false;
         }
 
         // Is indexer moving
         if (!isSpindexerIndexed) {
             telemetry.addData("Status: ", "Starting indexer moving to blocking position");
             initializeBlockPosition();
+            return true;
         }
+        return true;
     }
 
+    public void ShootAndSpin() {
+        Update(true);
+        spinAfterShoot = true;
+    }
+
+    public void ShootAndSpinUpdate(Spindexer spindexer) {
+        if (spinAfterShoot && currentState == State.IDLE) {
+            spinAfterShoot = false;
+            // done shooting so switch slot
+            spindex(true, spindexer);
+        }
+    }
 
     private void handleIdleState(boolean pressed) {
         // Toggle indexer open/closed
