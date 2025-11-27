@@ -24,7 +24,7 @@ public class Teleop extends OpMode {
     private final SimpleTurret simpleTurret = new SimpleTurret();
 
     private final Indexer indexer = new Indexer();
-
+    boolean spindexerDirection = true;
 
     @Override
     public void init() {
@@ -185,8 +185,10 @@ public class Teleop extends OpMode {
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
         if (gamepad1.left_bumper || gamepad1.right_bumper) {
+            spindexerDirection = gamepad1.dpad_left;
             indexer.spindex(gamepad1.left_bumper, spindexer);
         }
+        indexer.spindexerUpdate(spindexerDirection, spindexer);
 
         telemetry.addData("Intake RT", "%.2f", rt);
         telemetry.addData("LeftServo Power", LeftServo.getPower());

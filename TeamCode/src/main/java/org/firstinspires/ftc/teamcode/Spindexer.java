@@ -108,13 +108,7 @@ public class Spindexer {
     }
 
     public void rotateClockwise() {
-        if (spindexer.isBusy()) {
-            return;
-        }
-        int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
-        spindexer.setPower(SPEED);
-        spindexer.setTargetPosition(targetPosition);
-        currentPosition = getNewClockwisePos();
+        rotateClockwise(true);
 
         /*
         // This shifts all the positions clockwise Example: {1,2,3} -> {3,1,2}
@@ -125,9 +119,35 @@ public class Spindexer {
         */
     }
 
-    public void rotateCounterclockwise() {
+    public void rotateClockwise(boolean needIsBusy) {
         if (spindexer.isBusy()) {
-            return;
+            if (needIsBusy) {
+                return;
+            }
+        }
+        int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
+        spindexer.setPower(SPEED);
+        spindexer.setTargetPosition(targetPosition);
+        currentPosition = getNewClockwisePos();
+    }
+
+    public void rotateCounterclockwise() {
+        rotateCounterclockwise(true);
+
+        /*
+        // This shifts all the positions counter clockwise Example: {1,2,3} -> {2,3,1}
+        int firstPos = positions[0];
+        positions[0] = positions[1];
+        positions[1] = positions[2];
+        positions[2] = firstPos;
+        */
+    }
+
+    public void rotateCounterclockwise(boolean needIsBusy) {
+        if (spindexer.isBusy()) {
+            if (needIsBusy) {
+                return;
+            }
         }
         int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);

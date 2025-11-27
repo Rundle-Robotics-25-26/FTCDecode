@@ -126,9 +126,9 @@ public class Indexer {
         isMovingSpindexer = true;
         movingStartTime = System.currentTimeMillis();
         if (clockwise) {
-            spindexer.rotateClockwise();
+            spindexer.rotateClockwise(false);
         } else {
-            spindexer.rotateCounterclockwise();
+            spindexer.rotateCounterclockwise(false);
         }
     }
 
