@@ -179,6 +179,8 @@ public class Teleop extends OpMode {
         telemetry.addData("Shooter Speed", "%.1f", Math.abs(currentShooterPower * 100));
         telemetry.addData("Controls", "△: 0.6 Power, □: 0.4 Power, X: 0.8 Power");
         */
+
+        // ==== Manual Spindexer ====
         // ==== Indexer ====
         indexer.Update(gamepad1.circle);
 
@@ -189,6 +191,15 @@ public class Teleop extends OpMode {
             indexer.spindex(gamepad1.left_bumper, spindexer);
         }
         indexer.spindexerUpdate(spindexerDirection, spindexer);
+        // ====
+
+        // ==== Shoot + Spin Spindexer Macro
+        if (gamepad1.dpadUpWasPressed()) {
+            spindexerDirection = true;
+            indexer.ShootAndSpin();
+        }
+        indexer.ShootAndSpinUpdate(spindexer);
+        // ====
 
         telemetry.addData("Intake RT", "%.2f", rt);
         telemetry.addData("LeftServo Power", LeftServo.getPower());
