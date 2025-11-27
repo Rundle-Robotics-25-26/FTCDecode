@@ -185,7 +185,7 @@ public class Teleop extends OpMode {
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
         if (gamepad1.left_bumper || gamepad1.right_bumper) {
-            spindexerDirection = gamepad1.dpad_left;
+            spindexerDirection = gamepad1.left_bumper;
             indexer.spindex(gamepad1.left_bumper, spindexer);
         }
         indexer.spindexerUpdate(spindexerDirection, spindexer);
