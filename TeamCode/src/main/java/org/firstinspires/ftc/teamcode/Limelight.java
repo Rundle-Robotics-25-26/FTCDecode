@@ -27,7 +27,7 @@ public class Limelight {
     private Limelight3A limelight3A;
     private Telemetry telemetry;
 
-    private String latestPattern = "None";
+    public String latestPattern = "None";
 
     public void Init(HardwareMap hardwareMap, Telemetry tele) {
         telemetry = tele;
