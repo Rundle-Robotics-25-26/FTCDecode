@@ -202,6 +202,7 @@ public class Teleop extends OpMode {
             indexer.ShootAndSpin();
         }
         indexer.ShootAndSpinUpdate(spindexer);
+
         // ====
 
         telemetry.addData("Intake RT", "%.2f", rt);

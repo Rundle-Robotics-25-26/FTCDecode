@@ -191,14 +191,7 @@ public class LimeLightAuto extends OpMode {
 
     public void ShooterSet(double power)
     {
-        if (shooterOn)
-        {
             shooter.setPower(power);
-        } else
-        {
-            shooter.setPower(0);
-        }
-        shooterOn = !shooterOn;
     }
 
     @Override
