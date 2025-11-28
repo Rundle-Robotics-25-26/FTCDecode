@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
-@Autonomous(name = "Red 3 auto close", group = "Auto")
-public class Red3AutoClose extends OpMode {
+@Autonomous(name = "Blue 3 auto close", group = "Auto")
+public class Blue3AutoClose extends OpMode {
 
 
     private Follower follower;
@@ -82,6 +82,7 @@ public class Red3AutoClose extends OpMode {
                 if (shootsLeft <= 0) {
                     follower.followPath(toStart);
                     setPathState(3);
+
                 } else {
                     if (indexer.shooterSpinMacroState == Indexer.State.IN_SEQUENCE) {
                         // do nothing
@@ -92,6 +93,7 @@ public class Red3AutoClose extends OpMode {
                         indexer.ShootAndSpin();
                     }
                 }
+                break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
