@@ -62,6 +62,8 @@ public class Indexer {
         baseIndexer = hardwareMap.get(Servo.class, "base");
         armIndexer = hardwareMap.get(Servo.class, "arm");
 
+
+
         // Initialize servos to start positions
         baseIndexer.setPosition(BASE_START);
         armIndexer.setPosition(ARM_START);
