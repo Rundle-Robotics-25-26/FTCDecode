@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
+@
 public class Red3AutoClose extends OpMode {
 
 
