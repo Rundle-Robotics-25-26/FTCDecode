@@ -19,11 +19,11 @@ public class Indexer {
 
     // FIND THESE VALUES WITH THE TEST UPDATE
     final double ARM_START = 0.1317;
-    final double ARM_INDEX = 0.4967;
-    final double ARM_SPINDEX = 0.4428;
-    final double BASE_START = 0.13;
-    final double BASE_INDEX = 0.3961;
-    final double BASE_SPINDEX = 0.2628;
+    final double ARM_INDEX = 0.5439;
+    final double ARM_SPINDEX = 0.4878;
+    final double BASE_START = 0.0544;
+    final double BASE_INDEX = 0.3078;
+    final double BASE_SPINDEX = 0.1744;
 
     // New movement system variables
     public enum State { IDLE, IN_SEQUENCE, WAITING }
@@ -40,7 +40,7 @@ public class Indexer {
     private static final long ROTATE_MOVE_TIME = 500;
     private static final long PHASE_DELAY = 50;      // ms between phases
     private static final long AUTO_WAIT_TIME = 200; // ms to wait between open and close
-    private static final long RESET_TIME = 5000;
+    private static final long RESET_TIME = 500;
 
     // Start and target positions for smooth movement
     private double baseStartPos, armStartPos;
@@ -104,7 +104,6 @@ public class Indexer {
         telemetry.addData("Sequence Type", isOpeningSequence ? "OPENING" : "CLOSING");
         telemetry.addData("Auto Cycle", autoCycleEnabled ? "ACTIVE" : "INACTIVE");
         telemetry.addData("Indexer Open", indexerOpen);
-        telemetry.update();
     }
     public void initializeBlockPosition() {
         isSpindexerIndexed = true;

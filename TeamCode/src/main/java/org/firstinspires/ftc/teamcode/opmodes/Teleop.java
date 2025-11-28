@@ -89,7 +89,7 @@ public class Teleop extends OpMode {
         if (rt > 0.05) {
             // change: always run intake at full speed when trigger is pressed at all
             Intake(-1.0); // preserve original negative direction used previously
-        } else if (gamepad1.dpad_up) {
+        } else if (gamepad1.left_trigger > 0.05) {
             // manual full-speed reverse/intake
             Intake(1);
         } else {
@@ -182,7 +182,7 @@ public class Teleop extends OpMode {
 
         // ==== Manual Spindexer ====
         // ==== Indexer ====
-        indexer.Update(gamepad1.circle);
+        indexer.Update(false);
 
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
@@ -196,6 +196,9 @@ public class Teleop extends OpMode {
         // ==== Shoot + Spin Spindexer Macro
         if (gamepad1.dpadUpWasPressed()) {
             spindexerDirection = true;
+            indexer.ShootAndSpin();
+        } else if (gamepad1.dpadDownWasPressed()) {
+            spindexerDirection = false;
             indexer.ShootAndSpin();
         }
         indexer.ShootAndSpinUpdate(spindexer);

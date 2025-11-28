@@ -5,6 +5,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
+@Autonomous(name = "Red 3 auto close", group = "Auto")
 public class Red3AutoClose extends OpMode {
 
 
@@ -20,7 +22,7 @@ public class Red3AutoClose extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(28.5, 128, Math.toRadians(180)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(22, 122, Math.toRadians(143)); // Start Pose of our robot.
     private final Pose scorePose = new Pose(60, 85, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
     CRServo LeftServo, RightServo;
@@ -55,9 +57,10 @@ public class Red3AutoClose extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
+
+                ShooterSet(0.6);
                 follower.followPath(toShoot);
                 // Start the shooter
-                ShooterSet(0.6);
                 setPathState(1);
                 break;
             case 1:
@@ -69,7 +72,7 @@ public class Red3AutoClose extends OpMode {
             */
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 10) {
                     /* At shooting position so shoot all preloads */
                     shootsLeft = 3;
                     setPathState(2);
@@ -106,12 +109,7 @@ public class Red3AutoClose extends OpMode {
     }
 
     public void ShooterSet(double power) {
-        if (shooterOn) {
-            shooter.setPower(power);
-        } else {
-            shooter.setPower(0);
-        }
-        shooterOn = !shooterOn;
+        shooter.setPower(power);
     }
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
