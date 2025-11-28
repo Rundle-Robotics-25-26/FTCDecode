@@ -34,12 +34,12 @@ public class Indexer {
     private int sequencePhase = 0;
 
     // Movement parameters (adjust these based on testing)
-    private static final long BASE_MOVE_TIME = 400;  // ms//was 800
-    private static final long ARM_MOVE_TIME = 400;   // ms;
+    private static final long BASE_MOVE_TIME = 800;  // ms//was 800
+    private static final long ARM_MOVE_TIME = 800;   // ms;
     private static final long SPINDEX_MOVE_TIME = 200;
     private static final long ROTATE_MOVE_TIME = 500;
-    private static final long PHASE_DELAY = 50;      // ms between phases
-    private static final long AUTO_WAIT_TIME = 200; // ms to wait between open and close
+    private static final long PHASE_DELAY = 200;      // ms between phases
+    private static final long AUTO_WAIT_TIME = 500; // ms to wait between open and close
     private static final long RESET_TIME = 500;
 
     // Start and target positions for smooth movement

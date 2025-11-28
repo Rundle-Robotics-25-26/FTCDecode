@@ -58,7 +58,7 @@ public class Red3AutoClose extends OpMode {
         switch (pathState) {
             case 0:
 
-                ShooterSet(0.6);
+                ShooterSet(-0.6);
                 follower.followPath(toShoot);
                 // Start the shooter
                 setPathState(1);
@@ -72,7 +72,7 @@ public class Red3AutoClose extends OpMode {
             */
 
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 10) {
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
                     /* At shooting position so shoot all preloads */
                     shootsLeft = 3;
                     setPathState(2);
