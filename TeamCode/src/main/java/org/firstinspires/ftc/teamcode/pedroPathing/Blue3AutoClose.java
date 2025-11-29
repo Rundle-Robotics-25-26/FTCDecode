@@ -125,6 +125,8 @@ public class Blue3AutoClose extends OpMode {
         autonomousPathUpdate();
 
         // Feedback to Driver Hub for debugging
+        telemetry.addData("Indexer shoot state: ", indexer.shooterSpinMacroState);
+        telemetry.addData("Shoots left: ", shootsLeft);
         // ==== Spinner Status ====
         telemetry.addData("Spinner Position", spinner.getCurrentPosition());
         telemetry.addData("Spinner Target", spinner.getTargetPosition());
