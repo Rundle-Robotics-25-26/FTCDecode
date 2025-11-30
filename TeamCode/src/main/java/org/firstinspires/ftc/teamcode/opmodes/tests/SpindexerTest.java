@@ -17,10 +17,11 @@ public class SpindexerTest extends OpMode {
 
     @Override
     public void loop() {
-        int SPEED = 1;
-        if (gamepad1.dpad_left) {
+        int SPEED = 10;
+        spindexer.spindexer.setPower(0.8);
+        if (gamepad1.dpadRightWasPressed()) {
             spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() + SPEED);
-        } else if (gamepad1.dpad_right) {
+        } else if (gamepad1.dpadLeftWasPressed()) {
             spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() - SPEED);
         }
         telemetry.addData("Current position", spindexer.spindexer.getCurrentPosition());

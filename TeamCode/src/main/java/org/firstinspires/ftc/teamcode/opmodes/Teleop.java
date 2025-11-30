@@ -135,16 +135,16 @@ public class Teleop extends OpMode {
             if (!pressedSquare) {
                 pressedSquare = true;
 
-                if (shooterOn && currentShooterPower == -0.5) {
+                if (shooterOn && currentShooterPower == -0.48) {
                     // If shooter is running at 0.4, turn it off
                     shooter.setPower(0);
                     shooterOn = false;
                     currentShooterPower = 0.0;
                 } else {
                     // Turn on shooter at 0.4 power
-                    shooter.setPower(-0.5);
+                    shooter.setPower(-0.48);
                     shooterOn = true;
-                    currentShooterPower = -0.5;
+                    currentShooterPower = -0.48;
                 }
             }
         } else {
@@ -182,7 +182,7 @@ public class Teleop extends OpMode {
 
         // ==== Manual Spindexer ====
         // ==== Indexer ====
-        indexer.Update(false);
+        indexer.Update(gamepad1.circle);
 
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
@@ -200,6 +200,12 @@ public class Teleop extends OpMode {
         } else if (gamepad1.dpadDownWasPressed()) {
             spindexerDirection = false;
             indexer.ShootAndSpin();
+        }
+
+        if (gamepad1.dpad_left) {
+            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() + 2);
+        } else if (gamepad1.dpad_right) {
+            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() - 2);
         }
         indexer.ShootAndSpinUpdate(spindexer);
 

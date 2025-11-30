@@ -14,8 +14,8 @@ import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.RobotTimer;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
-@Autonomous(name = "Blue 3 auto close", group = "Auto")
-public class Blue3AutoClose extends OpMode {
+@Autonomous(name = "Red 3 auto close", group = "Auto")
+public class Red3AutoClose extends OpMode {
 
 
     private Follower follower;
@@ -23,9 +23,9 @@ public class Blue3AutoClose extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(22, 122, Math.toRadians(143)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(60, 85, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose leavePose = new Pose(45, 77, Math.toRadians(135));
+    private final Pose startPose = new Pose(123.702, 122.8, Math.toRadians(43)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(96.568, 94.37, Math.toRadians(43)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose leavePose = new Pose(99.583, 71.822, Math.toRadians(0));
     CRServo LeftServo, RightServo;
     private DcMotor shooter, spinner;
     boolean pressedTriangle, pressedSquare, pressedCross, shooterOn = false;
@@ -38,7 +38,7 @@ public class Blue3AutoClose extends OpMode {
     private PathChain toShoot, toStart, toLeave;
     int shootsLeft = 3;
 
-    RobotTimer shootTimer = new RobotTimer(5000);
+    RobotTimer shootTimer = new RobotTimer(4500);
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
     /* Here is an example for Constant Interpolation
@@ -65,7 +65,7 @@ public class Blue3AutoClose extends OpMode {
         switch (pathState) {
             case 0:
 
-                ShooterSet(-0.58);
+                ShooterSet(-0.45);
                 follower.followPath(toShoot);
                 // Start the shooter
                 setPathState(1);

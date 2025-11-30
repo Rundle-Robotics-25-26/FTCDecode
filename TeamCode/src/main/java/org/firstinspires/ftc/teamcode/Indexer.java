@@ -18,11 +18,11 @@ public class Indexer {
     private Servo baseIndexer, armIndexer;
 
     // FIND THESE VALUES WITH THE TEST UPDATE
-    final double ARM_START = 0.1317;
-    final double ARM_INDEX = 0.5439;
+    final double ARM_START = 0.1307;
+    final double ARM_INDEX = 0.5008;
     final double ARM_SPINDEX = 0.4878;
-    final double BASE_START = 0.0544;
-    final double BASE_INDEX = 0.3078;
+    final double BASE_START = 0.0344;
+    final double BASE_INDEX = 0.2866;
     final double BASE_SPINDEX = 0.1744;
 
     // New movement system variables
@@ -34,8 +34,8 @@ public class Indexer {
     private int sequencePhase = 0;
 
     // Movement parameters (adjust these based on testing)
-    private static final long BASE_MOVE_TIME = 800;  // ms//was 800
-    private static final long ARM_MOVE_TIME = 800;   // ms;
+    private static final long BASE_MOVE_TIME = 500;  // ms//was 800
+    private static final long ARM_MOVE_TIME = 500;   // ms;
     private static final long SPINDEX_MOVE_TIME = 200;
     private static final long ROTATE_MOVE_TIME = 500;
     private static final long PHASE_DELAY = 200;      // ms between phases
