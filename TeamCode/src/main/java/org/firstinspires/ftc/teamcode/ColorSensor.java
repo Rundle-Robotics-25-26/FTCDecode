@@ -35,7 +35,7 @@ public class ColorSensor {
     final float[] hsvValues = new float[3];
 
     Telemetry telemetry;
-    private String latestColor = "OTHER"; // the latest checked ball color
+    public String latestColor = "OTHER"; // the latest checked ball color
 
     private final int SAMPLE_SIZE = 50;
 

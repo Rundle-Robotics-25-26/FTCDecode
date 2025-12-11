@@ -64,7 +64,6 @@ public class Blue3AutoClose extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-
                 ShooterSet(-0.58);
                 follower.followPath(toShoot);
                 // Start the shooter
@@ -81,7 +80,6 @@ public class Blue3AutoClose extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4) {
                     /* At shooting position so shoot all preloads */
-                    shootsLeft = 3;
                     setPathState(2);
                 }
                 break;

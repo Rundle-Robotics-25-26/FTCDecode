@@ -15,19 +15,15 @@ public class Indexer {
     private boolean indexerOpen = false;
     private boolean indexerPressed = false;
 
-    private Servo baseIndexer, armIndexer;
+    private Servo indexer;
 
     // FIND THESE VALUES WITH THE TEST UPDATE
-    final double ARM_START = 0.1307;
-    final double ARM_INDEX = 0.5008;
-    final double ARM_SPINDEX = 0.4878;
-    final double BASE_START = 0.0344;
-    final double BASE_INDEX = 0.2866;
-    final double BASE_SPINDEX = 0.1744;
+    private final double INDEXER_START = 0.5;
+    private final double INDEXER_END = 0.7;
 
     // New movement system variables
-    public enum State { IDLE, IN_SEQUENCE, WAITING }
-    private State currentState = State.IDLE;
+    public enum State { IDLE, INDEXING_UP, INDEXING_DOWN, SPINNING}
+    public State currentState = State.IDLE;
     private long sequenceStartTime = 0;
     private long movingStartTime = 0;
     private long resetStartTime = 0;
@@ -46,331 +42,82 @@ public class Indexer {
     private double baseStartPos, armStartPos;
     private double baseTargetPos, armTargetPos;
 
-    // Track which sequence we're running
-    private boolean isOpeningSequence = false;
-    private boolean autoCycleEnabled = false;
-    private boolean isSpindexerIndexed = false;
-    private boolean isMovingSpindexer = false;
-    private boolean spinAfterShoot = false;
+    private boolean shootingAndSpinning = false;
 
-    public State shooterSpinMacroState = State.IDLE;
+
+    private RobotTimer indexerTimer = new RobotTimer(4000);
+    private RobotTimer spindexerSpinningTimer = new RobotTimer(1000);
+    // Track which sequence we're running
+
+
 
     public void Init(HardwareMap hardware, Telemetry tele) {
         hardwareMap = hardware;
         telemetry = tele;
 
-        baseIndexer = hardwareMap.get(Servo.class, "base");
-        armIndexer = hardwareMap.get(Servo.class, "arm");
-
-
+        indexer = hardwareMap.get(Servo.class, "indexer");
 
         // Initialize servos to start positions
-        baseIndexer.setPosition(BASE_START);
-        armIndexer.setPosition(ARM_START);
+        indexer.setPosition(INDEXER_START);
     }
 
-    public void TestUpdate(int armMovement, int baseMovement) {
+    public void TestUpdate(int movement) {
         double SPEED = 0.001;
 
-        if (armMovement > 0) {
-            armIndexer.setPosition(armIndexer.getPosition() + SPEED);
-        } else if (armMovement < 0) {
-            armIndexer.setPosition(armIndexer.getPosition() - SPEED);
+        if (movement > 0) {
+            indexer.setPosition(indexer.getPosition() + SPEED);
+        } else if (movement < 0) {
+            indexer.setPosition(indexer.getPosition() - SPEED);
         }
 
-        if (baseMovement > 0) {
-            baseIndexer.setPosition(baseIndexer.getPosition() + SPEED);
-        } else if (baseMovement < 0) {
-            baseIndexer.setPosition(baseIndexer.getPosition() - SPEED);
-        }
-        telemetry.addData("Current base position", baseIndexer.getPosition());
-        telemetry.addData("Current arm position", armIndexer.getPosition());
+        telemetry.addData("Current indexer position", indexer.getPosition());
         telemetry.update();
     }
 
-    public void Update(boolean pressed) {
-        if (isSpindexerIndexed) {
-            telemetry.addData("State", "MOVING Spindexer cause spindexing");
-            return;
-        }
-        if (currentState == State.IN_SEQUENCE || currentState == State.WAITING) {
-            updateSequence();
+    public void Index() {
+        if (currentState == State.IDLE) {
+            indexer.setPosition(INDEXER_END);
+            indexerTimer.start();
+            currentState = State.INDEXING_UP;
         } else {
-            handleIdleState(pressed);
+            telemetry.addData("CANT INDEX", "YET");
         }
-
-        telemetry.addData("Current base position", baseIndexer.getPosition());
-        telemetry.addData("Current arm position", armIndexer.getPosition());
-        telemetry.addData("State", currentState);
-        telemetry.addData("Phase", sequencePhase);
-        telemetry.addData("Sequence Type", isOpeningSequence ? "OPENING" : "CLOSING");
-        telemetry.addData("Auto Cycle", autoCycleEnabled ? "ACTIVE" : "INACTIVE");
-        telemetry.addData("Indexer Open", indexerOpen);
-    }
-    public void initializeBlockPosition() {
-        isSpindexerIndexed = true;
-        sequenceStartTime = System.currentTimeMillis();
-        baseIndexer.setPosition(BASE_SPINDEX);
-        armIndexer.setPosition(ARM_SPINDEX);
-    }
-    public boolean isReadyToSpindex() {
-        return currentState == State.IDLE;
-    }
-
-    public boolean isInBlockingPosition() {
-        long elapsed = System.currentTimeMillis() - sequenceStartTime;
-        if (isSpindexerIndexed && elapsed > SPINDEX_MOVE_TIME) { // the spindexer is at the position and are ready to switch slots
-            return true;
-        }
-        return false;
-    }
-
-    public void rotateSpindexer(boolean clockwise, Spindexer spindexer) {
-        isMovingSpindexer = true;
-        movingStartTime = System.currentTimeMillis();
-        if (clockwise) {
-            spindexer.rotateClockwise(false);
-        } else {
-            spindexer.rotateCounterclockwise(false);
-        }
-    }
-
-    public void stopSpindexer() {
-        isMovingSpindexer = false;
-        isSpindexerIndexed = false;
-        shooterSpinMacroState = State.WAITING;
-        baseIndexer.setPosition(BASE_START);
-        armIndexer.setPosition(ARM_START);
-    }
-    public void spindexerUpdate(boolean clockwise, Spindexer spindexer) {
-        if (isInBlockingPosition()) {
-            if (isMovingSpindexer) {
-                long movingElapsed = System.currentTimeMillis() - movingStartTime;
-                if (movingElapsed > ROTATE_MOVE_TIME) {
-                    stopSpindexer();
-                }
-            } else {
-                rotateSpindexer(clockwise, spindexer);
-            }
-        } else {
-            telemetry.addData("Status: ", "Still moving to blocking position");
-        }
-    }
-    public boolean spindex(boolean clockwise, Spindexer spindexer) {
-        // Is indexer shooting?
-        if (!isReadyToSpindex()) {
-            telemetry.addData("Status: ", "Must wait for indexer to be idle to spindex.");
-            return false;
-        }
-
-        // Is indexer moving
-        if (!isSpindexerIndexed) {
-            telemetry.addData("Status: ", "Starting indexer moving to blocking position");
-            initializeBlockPosition();
-            return true;
-        }
-        return true;
     }
 
     public void ShootAndSpin() {
-        shooterSpinMacroState = State.IN_SEQUENCE;
-        Update(true);
-        spinAfterShoot = true;
-    }
-
-    public void ShootAndSpinUpdate(Spindexer spindexer) {
-        if (spinAfterShoot && currentState == State.IDLE) {
-            spinAfterShoot = false;
-            // done shooting so switch slot
-            spindex(true, spindexer);
-        }
-    }
-
-    private void handleIdleState(boolean pressed) {
-        // Toggle indexer open/closed
-        if (pressed) {
-            if (!indexerPressed) {
-                indexerPressed = true;
-
-                if (!indexerOpen) {
-                    // Start auto cycle: open, wait, then close
-                    startAutoCycle();
-                } else {
-                    // Manual close if already open
-                    startCloseSequence();
-                    autoCycleEnabled = false;
-                }
-                // DON'T toggle indexerOpen here - let the sequences handle it
-            }
+        if (currentState == State.IDLE) {
+            shootingAndSpinning = true;
+            Index();
         } else {
-            indexerPressed = false;
+            telemetry.addData("CANT SHOOT AND SPIN", "YET");
         }
     }
+    public void Update() {
+         switch (currentState) {
+             case IDLE:
+                 // do nothing?
+                 break;
+             case INDEXING_UP:
+                 if (indexerTimer.IsDone()) {
+                     indexer.setPosition(INDEXER_START);
+                     indexerTimer.start();
+                     currentState = State.INDEXING_DOWN;
+                 }
+                 break;
+             case INDEXING_DOWN:
+                 if (indexerTimer.IsDone()) {
+                     if (shootingAndSpinning) {
+                         currentState = State.SPINNING;
+                         spindexerSpinningTimer.start();
+                         
+                     } else {
+                         currentState = State.IDLE;
+                     }
+                 }
+         }
 
-    private void startAutoCycle() {
-        autoCycleEnabled = true;
-        startOpenSequence();
-    }
-
-    private void startOpenSequence() {
-        currentState = State.IN_SEQUENCE;
-        sequenceStartTime = System.currentTimeMillis();
-        sequencePhase = 0;
-        isOpeningSequence = true;
-
-        // Store start positions for interpolation
-        baseStartPos = baseIndexer.getPosition();
-        armStartPos = armIndexer.getPosition();
-
-        baseTargetPos = BASE_INDEX;
-        armTargetPos = ARM_INDEX;
-
-        // Update state to reflect that we're opening
-        indexerOpen = true;
-    }
-
-    private void startCloseSequence() {
-        currentState = State.IN_SEQUENCE;
-        sequenceStartTime = System.currentTimeMillis();
-        sequencePhase = 0;
-        isOpeningSequence = false;
-
-        baseStartPos = baseIndexer.getPosition();
-        armStartPos = armIndexer.getPosition();
-
-        baseTargetPos = BASE_START;
-        armTargetPos = ARM_START;
-
-        // Update state to reflect that we're closing
-        indexerOpen = false;
-    }
-
-    private void updateSequence() {
-        long elapsed = System.currentTimeMillis() - sequenceStartTime;
-
-        if (currentState == State.WAITING) {
-            // Waiting phase between open and close
-            if (elapsed >= AUTO_WAIT_TIME) {
-                // Wait time complete, start closing sequence
-                startCloseSequence();
-            }
-            return;
-        }
-
-        if (isOpeningSequence) {
-            // OPENING: Base first, then arm
-            updateOpeningSequence(elapsed);
-        } else {
-            // CLOSING: Arm first, then base
-            updateClosingSequence(elapsed);
-        }
-    }
-
-    private void updateOpeningSequence(long elapsed) {
-        // Opening sequence: Base first, then arm
-        switch (sequencePhase) {
-            case 0: // Move base servo first
-                if (elapsed <= BASE_MOVE_TIME) {
-                    double progress = (double) elapsed / BASE_MOVE_TIME;
-                    double currentPos = interpolate(baseStartPos, baseTargetPos, progress);
-                    baseIndexer.setPosition(currentPos);
-                } else {
-                    baseIndexer.setPosition(baseTargetPos);
-                    sequencePhase = 1;
-                    sequenceStartTime = System.currentTimeMillis(); // Reset timer for next phase
-                }
-                break;
-
-            case 1: // Brief delay before arm movement
-                if (elapsed >= PHASE_DELAY) {
-                    sequencePhase = 2;
-                    sequenceStartTime = System.currentTimeMillis();
-                }
-                break;
-
-            case 2: // Move arm servo second
-                if (elapsed <= ARM_MOVE_TIME) {
-                    double progress = (double) elapsed / ARM_MOVE_TIME;
-                    double currentPos = interpolate(armStartPos, armTargetPos, progress);
-                    armIndexer.setPosition(currentPos);
-                } else {
-                    armIndexer.setPosition(armTargetPos);
-
-                    if (autoCycleEnabled) {
-                        // Start waiting period before auto-close
-                        currentState = State.WAITING;
-                        sequenceStartTime = System.currentTimeMillis();
-                    } else {
-                        currentState = State.IDLE;
-                        sequencePhase = 0;
-                    }
-                }
-                break;
-        }
-    }
-
-    private void updateClosingSequence(long elapsed) {
-        // Closing sequence: Arm first, then base
-        switch (sequencePhase) {
-            case 0: // Move arm servo first
-                if (elapsed <= ARM_MOVE_TIME) {
-                    double progress = (double) elapsed / ARM_MOVE_TIME;
-                    double currentPos = interpolate(armStartPos, armTargetPos, progress);
-                    armIndexer.setPosition(currentPos);
-                } else {
-                    armIndexer.setPosition(armTargetPos);
-                    sequencePhase = 1;
-                    sequenceStartTime = System.currentTimeMillis(); // Reset timer for next phase
-                }
-                break;
-
-            case 1: // Brief delay before base movement
-                if (elapsed >= PHASE_DELAY) {
-                    sequencePhase = 2;
-                    sequenceStartTime = System.currentTimeMillis();
-                }
-                break;
-
-            case 2: // Move base servo second
-                if (elapsed <= BASE_MOVE_TIME) {
-                    double progress = (double) elapsed / BASE_MOVE_TIME;
-                    double currentPos = interpolate(baseStartPos, baseTargetPos, progress);
-                    baseIndexer.setPosition(currentPos);
-                } else {
-                    baseIndexer.setPosition(baseTargetPos);
-                    currentState = State.IDLE;
-                    sequencePhase = 0;
-                    autoCycleEnabled = false; // Reset auto cycle
-                }
-                break;
-        }
-    }
-
-    private double interpolate(double start, double end, double progress) {
-        // Use easing function for smoother movement
-        progress = Math.max(0, Math.min(1, progress));
-        // Simple linear interpolation
-        return start + (end - start) * progress;
-    }
-
-    // Keep your original methods for compatibility
-    public void Open() {
-        if (!indexerOpen && currentState == State.IDLE) {
-            startOpenSequence();
-        }
-    }
-
-    public void Closed() {
-        if (indexerOpen && currentState == State.IDLE) {
-            startCloseSequence();
-        }
-    }
-
-    // New method for auto cycle
-    public void AutoCycle() {
-        if (!indexerOpen && currentState == State.IDLE) {
-            startAutoCycle();
-        }
+        telemetry.addData("Current indexer position", indexer.getPosition());
+        telemetry.addData("State", currentState);
     }
 
 }

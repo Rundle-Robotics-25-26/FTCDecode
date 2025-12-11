@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Indexer;
 //import org.firstinspires.ftc.teamcode.SimpleTurret;
+import org.firstinspires.ftc.teamcode.Intake;
 import org.firstinspires.ftc.teamcode.SimpleTurret;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
@@ -14,8 +15,8 @@ import org.firstinspires.ftc.teamcode.Spindexer;
 public class Teleop extends OpMode {
 
     // Motor declarations
-    private DcMotor frontLeft, frontRight, backLeft, backRight, shooter, spinner;
-    CRServo LeftServo, RightServo;
+    private DcMotor frontLeft, frontRight, backLeft, backRight, shooter, spinner, LeftIntake;
+    DC LeftServo, RightServo;
 
     boolean pressedTriangle, pressedSquare, pressedCross, shooterOn = false;
     private double currentShooterPower = 0.0;
@@ -24,6 +25,7 @@ public class Teleop extends OpMode {
     private final SimpleTurret simpleTurret = new SimpleTurret();
 
     private final Indexer indexer = new Indexer();
+    private final Intake intake = new Intake();
     boolean spindexerDirection = true;
 
     @Override
@@ -56,8 +58,8 @@ public class Teleop extends OpMode {
         spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // ==== Intake setup ====
-        LeftServo = hardwareMap.get(CRServo.class, "LeftServo");
-        RightServo = hardwareMap.get(CRServo.class, "RightServo");
+        intake.Init(telemetry, hardwareMap);
+
 
         // ==== Spindexer setup ====
         spindexer.freshInit(hardwareMap);
@@ -88,12 +90,12 @@ public class Teleop extends OpMode {
         double rt = gamepad1.right_trigger;
         if (rt > 0.05) {
             // change: always run intake at full speed when trigger is pressed at all
-            Intake(-1.0); // preserve original negative direction used previously
+            intake.spinIn(); // preserve original negative direction used previously
         } else if (gamepad1.left_trigger > 0.05) {
             // manual full-speed reverse/intake
-            Intake(1);
+            intake.spinOut();
         } else {
-            Intake(0);  // Stop
+            intake.stop();
         }
 
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
@@ -110,66 +112,18 @@ public class Teleop extends OpMode {
 
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
-        if (gamepad1.square) {
-            if (!pressedTriangle) {
-                pressedTriangle = true;
-
-                if (shooterOn && currentShooterPower == -0.6) {
-                    // If shooter is running at 0.6, turn it off
-                    shooter.setPower(0);
-                    shooterOn = false;
-                    currentShooterPower = 0.0;
-                } else {
-                    // Turn on shooter at 0.6 power
-                    shooter.setPower(-0.6);
-                    shooterOn = true;
-                    currentShooterPower = -0.6;
-                }
-            }
-        } else {
-            pressedTriangle = false;
+        if (gamepad1.squareWasPressed()) {
+            setShooter(-0.6);
         }
 
         // Square button: Toggle 0.4 power
-        if (gamepad1.triangle) {
-            if (!pressedSquare) {
-                pressedSquare = true;
-
-                if (shooterOn && currentShooterPower == -0.48) {
-                    // If shooter is running at 0.4, turn it off
-                    shooter.setPower(0);
-                    shooterOn = false;
-                    currentShooterPower = 0.0;
-                } else {
-                    // Turn on shooter at 0.4 power
-                    shooter.setPower(-0.48);
-                    shooterOn = true;
-                    currentShooterPower = -0.48;
-                }
-            }
-        } else {
-            pressedSquare = false;
+        if (gamepad1.triangleWasPressed()) {
+            setShooter(-0.48);
         }
 
         // Cross button: Toggle 0.8 power
-        if (gamepad1.cross) {
-            if (!pressedCross) {
-                pressedCross = true;
-
-                if (shooterOn && currentShooterPower == -0.75) {
-                    // If shooter is running at 0.8, turn it off
-                    shooter.setPower(0);
-                    shooterOn = false;
-                    currentShooterPower = 0.0;
-                } else {
-                    // Turn on shooter at 0.8 power
-                    shooter.setPower(-0.75);
-                    shooterOn = true;
-                    currentShooterPower = -0.75;
-                }
-            }
-        } else {
-            pressedCross = false;
+        if (gamepad1.crossWasPressed()) {
+            setShooter(-0.75);
         }
 
         // ==== Shooter Telemetry ====
@@ -182,39 +136,42 @@ public class Teleop extends OpMode {
 
         // ==== Manual Spindexer ====
         // ==== Indexer ====
-        indexer.Update(gamepad1.circle);
+        if (gamepad1.circleWasPressed()) {
+            indexer.Index();
+        }
+        indexer.Update();
+
 
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
-        if (gamepad1.left_bumper || gamepad1.right_bumper) {
-            spindexerDirection = gamepad1.left_bumper;
-            indexer.spindex(gamepad1.left_bumper, spindexer);
+        if (indexer.currentState == Indexer.State.IDLE) { // can't spindex if indexer is shooting
+            if (gamepad1.left_bumper) {
+                spindexer.rotateClockwise();
+            } else if (gamepad1.right_bumper) {
+                spindexer.rotateCounterclockwise();
+            }
         }
-        indexer.spindexerUpdate(spindexerDirection, spindexer);
-        // ====
 
-        // ==== Shoot + Spin Spindexer Macro
-        if (gamepad1.dpadUpWasPressed()) {
-            spindexerDirection = true;
-            indexer.ShootAndSpin();
-        } else if (gamepad1.dpadDownWasPressed()) {
-            spindexerDirection = false;
-            indexer.ShootAndSpin();
-        }
 
         if (gamepad1.dpad_left) {
             spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() + 2);
         } else if (gamepad1.dpad_right) {
             spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() - 2);
         }
-        indexer.ShootAndSpinUpdate(spindexer);
 
         // ====
 
         telemetry.addData("Intake RT", "%.2f", rt);
-        telemetry.addData("LeftServo Power", LeftServo.getPower());
-        telemetry.addData("RightServo Power", RightServo.getPower());
         telemetry.update();
+    }
+
+    private void setShooter(double power) {
+        if (power == currentShooterPower) {
+            currentShooterPower = 0;
+        } else {
+            currentShooterPower = power;
+        }
+        shooter.setPower(power);
     }
 
     private void driveMecanum(double drive, double strafe, double rotate) {
@@ -242,8 +199,4 @@ public class Teleop extends OpMode {
         backRight.setPower(backRightPower);
     }
 
-    public void Intake(double power) {
-        LeftServo.setPower(power);
-        RightServo.setPower(-power);
-    }
 }
