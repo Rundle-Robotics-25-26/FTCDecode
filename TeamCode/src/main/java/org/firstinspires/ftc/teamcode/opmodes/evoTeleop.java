@@ -14,9 +14,8 @@ import org.firstinspires.ftc.teamcode.Indexer;
 import org.firstinspires.ftc.teamcode.SimpleTurret;
 import org.firstinspires.ftc.teamcode.Spindexer;
 
-@TeleOp(name = "evoTeleop", group = "Drive")
-public class evoTeleop extends OpMode {
-
+public class evoTeleop  {
+/*
     // Motor declarations
     private DcMotor frontLeft, frontRight, backLeft, backRight, spinner;
     // change shooter type to DcMotorEx to access velocity
@@ -113,7 +112,7 @@ public class evoTeleop extends OpMode {
         shooterLastTimeNs = System.nanoTime(); // initialize PID timing
 
         // ==== Indexer setup ====
-        indexer.Init(hardwareMap, telemetry);
+        //indexer.Init(hardwareMap, telemetry);
     }
 
     @Override
@@ -263,4 +262,6 @@ public class evoTeleop extends OpMode {
         LeftServo.setPower(power);
         RightServo.setPower(-power);
     }
+
+ */
 }

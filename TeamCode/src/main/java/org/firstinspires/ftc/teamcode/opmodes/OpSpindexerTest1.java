@@ -18,7 +18,7 @@ public class OpSpindexerTest1 extends OpMode {
     @Override
     public void init(){
         spindexer.dataInit(hardwareMap);
-        indexer.Init(hardwareMap, telemetry);
+       // indexer.Init(hardwareMap, telemetry);
     }
 
     @Override
@@ -32,9 +32,9 @@ public class OpSpindexerTest1 extends OpMode {
         // indexer
         if (gamepad1.dpad_left || gamepad1.dpad_right) {
             spindexerDirection = gamepad1.dpad_left;
-            indexer.spindex(gamepad1.dpad_left, spindexer);
+            //indexer.spindex(gamepad1.dpad_left, spindexer);
         }
-        indexer.spindexerUpdate(spindexerDirection, spindexer);
+        //indexer.spindexerUpdate(spindexerDirection, spindexer);
 
         //telemetry.addData("Nearest Spindexer Position: ",spindexer.getSpindexerNearest());
         telemetry.addData("Current position index", spindexer.currentPosition);

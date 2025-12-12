@@ -16,7 +16,7 @@ public class Teleop extends OpMode {
 
     // Motor declarations
     private DcMotor frontLeft, frontRight, backLeft, backRight, shooter, spinner, LeftIntake;
-    DC LeftServo, RightServo;
+    DcMotor LeftServo, RightServo;
 
     boolean pressedTriangle, pressedSquare, pressedCross, shooterOn = false;
     private double currentShooterPower = 0.0;
@@ -74,7 +74,7 @@ public class Teleop extends OpMode {
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         // ==== Indexer setup ====
-        indexer.Init(hardwareMap, telemetry);
+        indexer.Init(hardwareMap, telemetry, spindexer);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class Teleop extends OpMode {
         if (gamepad1.circleWasPressed()) {
             indexer.Index();
         }
-        indexer.Update();
+        indexer.Update(false);
 
 
         // ==== Spindexer ====
@@ -171,7 +171,7 @@ public class Teleop extends OpMode {
         } else {
             currentShooterPower = power;
         }
-        shooter.setPower(power);
+        shooter.setPower(currentShooterPower);
     }
 
     private void driveMecanum(double drive, double strafe, double rotate) {

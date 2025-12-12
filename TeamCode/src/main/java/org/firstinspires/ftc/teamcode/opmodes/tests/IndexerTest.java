@@ -17,7 +17,7 @@ public class IndexerTest extends OpMode {
 
     @Override
     public void init() {
-        indexer.Init(hardwareMap, telemetry);
+        indexer.Init(hardwareMap, telemetry, null);
     }
 
     @Override
@@ -29,6 +29,6 @@ public class IndexerTest extends OpMode {
         if (gamepad1.right_bumper) {
             movement = -1;
         }
-        indexer.TestUpdate(movement);
+       indexer.TestUpdate(movement);
     }
 }

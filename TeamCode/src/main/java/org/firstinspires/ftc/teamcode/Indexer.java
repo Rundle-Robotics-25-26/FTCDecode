@@ -18,8 +18,8 @@ public class Indexer {
     private Servo indexer;
 
     // FIND THESE VALUES WITH THE TEST UPDATE
-    private final double INDEXER_START = 0.5;
-    private final double INDEXER_END = 0.7;
+    private final double INDEXER_START = 0.6683;
+    private final double INDEXER_END = 0.2989;
 
     // New movement system variables
     public enum State { IDLE, INDEXING_UP, INDEXING_DOWN, SPINNING}
@@ -43,20 +43,21 @@ public class Indexer {
     private double baseTargetPos, armTargetPos;
 
     private boolean shootingAndSpinning = false;
+    private int shootingAndSpinningALL = 0;
 
-
-    private RobotTimer indexerTimer = new RobotTimer(4000);
+    private Spindexer spindexer;
+    private RobotTimer indexerTimer = new RobotTimer(900);
     private RobotTimer spindexerSpinningTimer = new RobotTimer(1000);
     // Track which sequence we're running
 
 
 
-    public void Init(HardwareMap hardware, Telemetry tele) {
+    public void Init(HardwareMap hardware, Telemetry tele, Spindexer spin) {
         hardwareMap = hardware;
         telemetry = tele;
 
         indexer = hardwareMap.get(Servo.class, "indexer");
-
+        spindexer = spin;
         // Initialize servos to start positions
         indexer.setPosition(INDEXER_START);
     }
@@ -75,7 +76,7 @@ public class Indexer {
     }
 
     public void Index() {
-        if (currentState == State.IDLE) {
+        if (CanShoot()) {
             indexer.setPosition(INDEXER_END);
             indexerTimer.start();
             currentState = State.INDEXING_UP;
@@ -83,13 +84,24 @@ public class Indexer {
             telemetry.addData("CANT INDEX", "YET");
         }
     }
-
+    public boolean CanShoot() {
+        return currentState == State.IDLE && !shootingAndSpinning && shootingAndSpinningALL == 0;
+    }
     public void ShootAndSpin() {
-        if (currentState == State.IDLE) {
+        if (CanShoot()) {
             shootingAndSpinning = true;
             Index();
         } else {
             telemetry.addData("CANT SHOOT AND SPIN", "YET");
+        }
+    }
+
+    public void ShootAndSpinAll() {
+        if (CanShoot()) {
+            shootingAndSpinningALL = 3;
+            Index();
+        } else {
+            telemetry.addData("CANT SHOOT AND SPIN ALL", "YET");
         }
     }
     public void Update() {
@@ -108,12 +120,28 @@ public class Indexer {
                  if (indexerTimer.IsDone()) {
                      if (shootingAndSpinning) {
                          currentState = State.SPINNING;
+                         shootingAndSpinning = false;
+                         spindexer.rotateClockwise(false);
                          spindexerSpinningTimer.start();
-                         
+                     } else if (shootingAndSpinningALL > 0) {
+                        currentState = State.SPINNING;
+                        shootingAndSpinningALL--;
+                        spindexer.rotateClockwise(false);
+                        spindexerSpinningTimer.start();
                      } else {
                          currentState = State.IDLE;
                      }
                  }
+                 break;
+             case SPINNING:
+                 if (spindexerSpinningTimer.IsDone()) {
+                     if (shootingAndSpinningALL > 0) {
+                         Index();
+                     } else {
+                         currentState = State.IDLE;
+                     }
+                 }
+                 break;
          }
 
         telemetry.addData("Current indexer position", indexer.getPosition());

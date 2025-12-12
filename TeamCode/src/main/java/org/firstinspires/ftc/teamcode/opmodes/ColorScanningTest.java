@@ -25,7 +25,7 @@ public class ColorScanningTest extends OpMode {
     @Override
     public void loop() {
         //colorScanning.ScanAll(); // test 1
-        colorScanning.MoveToEmptySlot(); // test 2
+        //colorScanning.MoveToEmptySlot(); // test 2
         telemetry.update();
     }
 }

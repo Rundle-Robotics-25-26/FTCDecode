@@ -72,7 +72,7 @@ public class BlueTeleSmall extends OpMode {
         // ==== Spindexer setup ====
         spindexer.freshInit(hardwareMap);
         //indexer
-        indexer.Init(hardwareMap, telemetry);
+        //indexer.Init(hardwareMap, telemetry);
         //shooter
         shooterFunctions = new ShooterRobotFunctions();
         // The init method handles setting up hardware and the A & B controllers
@@ -182,14 +182,14 @@ public class BlueTeleSmall extends OpMode {
         telemetry.addData("Spinner Power", spinner.getPower());
         telemetry.addData("Spinner Busy", spinner.isBusy());
         //indexer
-        indexer.Update(gamepad1.circle);
+        indexer.Update();
         //spindexer
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
         if (gamepad1.left_bumper || gamepad1.right_bumper) {
             spindexerDirection = gamepad1.left_bumper;
-            indexer.spindex(gamepad1.left_bumper, spindexer);
+            //indexer.spindex(gamepad1.left_bumper, spindexer);
         }
-        indexer.spindexerUpdate(spindexerDirection, spindexer);
+        //indexer.spindexerUpdate(spindexerDirection, spindexer);
 
         telemetry.addData("Intake RT", "%.2f", rt);
         telemetry.addData("LeftServo Power", LeftServo.getPower());

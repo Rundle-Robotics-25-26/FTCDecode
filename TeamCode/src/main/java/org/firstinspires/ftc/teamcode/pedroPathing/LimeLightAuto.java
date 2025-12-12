@@ -72,51 +72,36 @@ public class LimeLightAuto extends OpMode {
                 break;
             case 1:
                 if (limelight.latestPattern.equals("GPP"))
+                {
+                    if(!follower.isBusy())
                     {
-                        if(!follower.isBusy())
-                        {
-                            follower.followPath(path2,true);
-                            setPathState(2);
-                        }
-
-                    } else if (limelight.latestPattern.equals("PGP"))
-                    {
-                        if(!follower.isBusy())
-                        {
-                            follower.followPath(path2,true);
-                            setPathState(3);
-                        }
-
-                    } else if (limelight.latestPattern.equals("PPG"))
-                    {
-                        if(!follower.isBusy())
-                        {
-                            follower.followPath(path2,true);
-                            setPathState(4);
-                        }
+                        follower.followPath(path2,true);
+                        setPathState(2);
                     }
+
+                } else if (limelight.latestPattern.equals("PGP"))
+                {
+                    if(!follower.isBusy())
+                    {
+                        follower.followPath(path2,true);
+                        setPathState(3);
+                    }
+
+                } else if (limelight.latestPattern.equals("PPG"))
+                {
+                    if(!follower.isBusy())
+                    {
+                        follower.followPath(path2,true);
+                        setPathState(4);
+                    }
+                }
                 break;
 
             case 2:
                 /**GPP**/
                 if(!follower.isBusy()){
-
-                    if (shootAmount <= 0) {
-                        follower.followPath(path3);
-                        setPathState(5);
-                    } else {
-                        if (indexer.shooterSpinMacroState == Indexer.State.IN_SEQUENCE)
-                        {
-                            // do nothing
-                        } else if (indexer.shooterSpinMacroState == Indexer.State.WAITING)
-                        {
-                            shootAmount--;
-                            indexer.shooterSpinMacroState = Indexer.State.IDLE;
-                        } else
-                        {
-                            indexer.ShootAndSpin();
-                        }
-                    }
+                    indexer.ShootAndSpinAll();
+                    setPathState(5);
                 }
                 break;
 
@@ -125,24 +110,8 @@ public class LimeLightAuto extends OpMode {
                 spindexer.rotateCounterclockwise(false);
                 if(!follower.isBusy())
                 {
-                    if (shootAmount <= 0)
-                    {
-                        follower.followPath(path3);
-                        setPathState(5);
-                    } else
-                    {
-                        if (indexer.shooterSpinMacroState == Indexer.State.IN_SEQUENCE)
-                        {
-                            // do nothing
-                        } else if (indexer.shooterSpinMacroState == Indexer.State.WAITING)
-                        {
-                            shootAmount--;
-                            indexer.shooterSpinMacroState = Indexer.State.IDLE;
-                        } else
-                        {
-                            indexer.ShootAndSpin();
-                        }
-                    }
+                    indexer.ShootAndSpinAll();
+                    setPathState(5);
                 }
                 break;
 
@@ -151,25 +120,8 @@ public class LimeLightAuto extends OpMode {
                 spindexer.rotateClockwise(false);
                 if(!follower.isBusy())
                 {
-
-                    if (shootAmount <= 0)
-                    {
-                        follower.followPath(path3);
-                        setPathState(5);
-                    } else
-                    {
-                        if (indexer.shooterSpinMacroState == Indexer.State.IN_SEQUENCE)
-                        {
-                            // do nothing
-                        } else if (indexer.shooterSpinMacroState == Indexer.State.WAITING)
-                        {
-                            shootAmount--;
-                            indexer.shooterSpinMacroState = Indexer.State.IDLE;
-                        } else
-                        {
-                            indexer.ShootAndSpin();
-                        }
-                    }
+                    indexer.ShootAndSpinAll();
+                    setPathState(5);
                 }
                 break;
 
@@ -191,7 +143,7 @@ public class LimeLightAuto extends OpMode {
 
     public void ShooterSet(double power)
     {
-            shooter.setPower(power);
+        shooter.setPower(power);
     }
 
     @Override
@@ -200,9 +152,7 @@ public class LimeLightAuto extends OpMode {
         LLResult result = limelight.Update();
         limelight.detectAprilTags(result);
 
-        indexer.Update(false);
-        indexer.spindexerUpdate(spindexerDirection, spindexer);
-        indexer.ShootAndSpinUpdate(spindexer);
+        indexer.Update();
 
         follower.update();
         autonomousPathUpdate();
@@ -231,7 +181,7 @@ public class LimeLightAuto extends OpMode {
         limelight.Init(hardwareMap, telemetry);
 
         // ==== Indexer setup ====
-        indexer.Init(hardwareMap, telemetry);
+        indexer.Init(hardwareMap, telemetry, spindexer);
 
         // ==== Spinner Setup - Constant Hold at Position 0 ====
         spinner = hardwareMap.get(DcMotor.class, "motor2");
@@ -290,6 +240,3 @@ public class LimeLightAuto extends OpMode {
 
 
 }
-
-
-

@@ -132,16 +132,16 @@ public class Red3AutoClose extends OpMode {
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
     @Override
     public void loop() {
-        indexer.Update(false);
-        indexer.spindexerUpdate(spindexerDirection, spindexer);
-        indexer.ShootAndSpinUpdate(spindexer);
+        //indexer.Update(false);
+        //indexer.spindexerUpdate(spindexerDirection, spindexer);
+        //indexer.ShootAndSpinUpdate(spindexer);
 
         // These loop the movements of the robot, these must be called continuously in order to work
         follower.update();
         autonomousPathUpdate();
 
         // Feedback to Driver Hub for debugging
-        telemetry.addData("Indexer shoot state: ", indexer.shooterSpinMacroState);
+        //telemetry.addData("Indexer shoot state: ", indexer.shooterSpinMacroState);
         telemetry.addData("Shoots left: ", shootsLeft);
         // ==== Spinner Status ====
         telemetry.addData("Spinner Position", spinner.getCurrentPosition());
@@ -187,7 +187,7 @@ public class Red3AutoClose extends OpMode {
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         // ==== Indexer setup ====
-        indexer.Init(hardwareMap, telemetry);
+        //indexer.Init(hardwareMap, telemetry);
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
