@@ -21,14 +21,14 @@ public class Spindexer {
      */
     public DcMotor spindexer; //Name motor accordingly (need to figure out how to make it work with any motor)
     private String motorName = null; // this is where the hardware map name would be put maybe TESTING NEEDED
-    private double ticksPerRotation = 375;// CHANGE DEPENDING ON ROBOT
+    private double ticksPerRotation = 382;// CHANGE DEPENDING ON ROBOT
     private double targetPositionMultiple = ticksPerRotation / 3;
     // find positions of all spindexer indexes
     private double positionOne = targetPositionMultiple;
     private double positionTwo = targetPositionMultiple * 2;
     private double positionThree = targetPositionMultiple * 3;
 
-    private final double SPEED = 0.75;
+    private final double SPEED = 0.5;
 
     public int currentPosition = 1;
 

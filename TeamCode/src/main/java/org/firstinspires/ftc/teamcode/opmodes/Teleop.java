@@ -80,23 +80,21 @@ public class Teleop extends OpMode {
     @Override
     public void loop() {
         // ==== Mecanum Drive ====
-        double drive = -gamepad1.left_stick_y;  // Reverse Y axis//we made it separate for 2 controllers
+        double drive = gamepad1.left_stick_y;  // Reverse Y axis//we made it separate for 2 controllers
         double strafe = gamepad1.left_stick_x;
         double rotate = gamepad1.right_stick_x;
         driveMecanum(drive, strafe, rotate);
 
         // ==== Intake ====
         // Use trigger value for proportional control, keep small deadzone
-        double rt = gamepad1.right_trigger;
-        if (rt > 0.05) {
-            // change: always run intake at full speed when trigger is pressed at all
-            intake.spinIn(); // preserve original negative direction used previously
-        } else if (gamepad1.left_trigger > 0.05) {
-            // manual full-speed reverse/intake
+        if (gamepad1.left_trigger > 0.05) {
             intake.spinOut();
-        } else {
+        } else if (gamepad1.right_trigger > 0.05) {
             intake.stop();
+        } else {
+            intake.spinIn();
         }
+
 
         //telemetry.addData("Current spindexer positions: ", "Pos1 (Indexer position): %d, Pos2 (To the right of indexer): %d, Pos3: %d", spindexer.positions[0], spindexer.positions[1], spindexer.positions[2]);
 
@@ -113,17 +111,17 @@ public class Teleop extends OpMode {
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
         if (gamepad1.squareWasPressed()) {
-            setShooter(-0.6);
+            setShooter(-0.7);
         }
 
         // Square button: Toggle 0.4 power
         if (gamepad1.triangleWasPressed()) {
-            setShooter(-0.48);
+            setShooter(-0.65);
         }
 
         // Cross button: Toggle 0.8 power
         if (gamepad1.crossWasPressed()) {
-            setShooter(-0.75);
+            setShooter(-1);
         }
 
         // ==== Shooter Telemetry ====
@@ -139,7 +137,7 @@ public class Teleop extends OpMode {
         if (gamepad1.circleWasPressed()) {
             indexer.Index();
         }
-        indexer.Update(false);
+        indexer.Update();
 
 
         // ==== Spindexer ====
@@ -152,16 +150,15 @@ public class Teleop extends OpMode {
             }
         }
 
-
+        final int MANUAL_SPEED = 6;
         if (gamepad1.dpad_left) {
-            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() + 2);
+            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() + MANUAL_SPEED);
         } else if (gamepad1.dpad_right) {
-            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() - 2);
+            spindexer.spindexer.setTargetPosition(spindexer.spindexer.getCurrentPosition() - MANUAL_SPEED);
         }
 
         // ====
 
-        telemetry.addData("Intake RT", "%.2f", rt);
         telemetry.update();
     }
 
