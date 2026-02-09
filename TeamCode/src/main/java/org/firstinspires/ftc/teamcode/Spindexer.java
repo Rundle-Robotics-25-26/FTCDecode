@@ -47,6 +47,7 @@ public class Spindexer {
         spindexer.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         spindexer.setTargetPosition(0);
         spindexer.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        spindexer.setPower(SPEED);
         spindexer.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
@@ -125,7 +126,7 @@ public class Spindexer {
                 return;
             }
         }
-        int targetPosition = spindexer.getCurrentPosition() + (int)targetPositionMultiple;
+        int targetPosition = getNewClockwisePos() * (int)targetPositionMultiple;
         spindexer.setPower(SPEED);
         spindexer.setTargetPosition(targetPosition);
         currentPosition = getNewClockwisePos();
@@ -149,7 +150,7 @@ public class Spindexer {
                 return;
             }
         }
-        int targetPosition = spindexer.getCurrentPosition() - (int)targetPositionMultiple;
+        int targetPosition = getNewCounterClockwisePos() * (int)targetPositionMultiple;
         spindexer.setPower(-SPEED);
         spindexer.setTargetPosition(targetPosition);
 

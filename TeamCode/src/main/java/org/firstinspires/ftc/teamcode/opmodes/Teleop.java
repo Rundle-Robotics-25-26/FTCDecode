@@ -50,12 +50,6 @@ public class Teleop extends OpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // ==== Spinner Setup - Constant Hold at Position 0 ====
-        spinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spinner.setTargetPosition(0);
-        spinner.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        spinner.setPower(0.3); // Holding power to maintain position
-        spinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // ==== Intake setup ====
         intake.Init(telemetry, hardwareMap);
@@ -111,17 +105,17 @@ public class Teleop extends OpMode {
         // ==== Shooter ====
         // Triangle button: Toggle 0.6 power
         if (gamepad1.squareWasPressed()) {
-            setShooter(-0.7);
+            setShooter(-0.69);
         }
 
         // Square button: Toggle 0.4 power
         if (gamepad1.triangleWasPressed()) {
-            setShooter(-0.65);
+            setShooter(-0.63);
         }
 
         // Cross button: Toggle 0.8 power
         if (gamepad1.crossWasPressed()) {
-            setShooter(-1);
+            setShooter(-0.77);
         }
 
         // ==== Shooter Telemetry ====

@@ -18,7 +18,7 @@ public class Indexer {
     private Servo indexer;
 
     // FIND THESE VALUES WITH THE TEST UPDATE
-    private final double INDEXER_START = 0.6683;
+    private final double INDEXER_START = 0.48;
     private final double INDEXER_END = 0.2989;
 
     // New movement system variables
