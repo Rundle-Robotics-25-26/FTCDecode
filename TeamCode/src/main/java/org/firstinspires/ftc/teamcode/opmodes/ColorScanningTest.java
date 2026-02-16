@@ -1,11 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.ColorScanning;
-import org.firstinspires.ftc.teamcode.ColorSensor;
-import org.firstinspires.ftc.teamcode.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 //@TeleOp(name="Color scan test")
 public class ColorScanningTest extends OpMode {

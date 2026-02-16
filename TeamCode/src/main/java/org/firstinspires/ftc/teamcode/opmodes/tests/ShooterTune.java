@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.opmodes.Shooter;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 public class ShooterTune extends OpMode {
     Shooter shooter = new Shooter();

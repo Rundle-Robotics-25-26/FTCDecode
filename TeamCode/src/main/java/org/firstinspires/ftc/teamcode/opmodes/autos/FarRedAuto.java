@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Indexer;
-import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.RobotTimer;
-import org.firstinspires.ftc.teamcode.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 @Autonomous(name = "Far Red auto hard code", group = "Actual Auto")
 public class FarRedAuto extends OpMode {
@@ -66,7 +66,7 @@ public class FarRedAuto extends OpMode {
                 break;
             case 3:
                 if (shootTimer.IsDone()) {
-                    spindexer.rotateClockwise(false);
+                    spindexer.rotateClockwise();
                     shootTimer.start();
                     setPathState(4);
                 }
@@ -80,7 +80,7 @@ public class FarRedAuto extends OpMode {
                 break;
             case 5:
                 if (shootTimer.IsDone()) {
-                    spindexer.rotateClockwise(false);
+                    spindexer.rotateClockwise();
                     shootTimer.start();
                     setPathState(10);
                 }
@@ -111,7 +111,7 @@ public class FarRedAuto extends OpMode {
                 break;
             case 10:
                 if (shootTimer.IsDone()) {
-                    spindexer.rotateClockwise(false);
+                    spindexer.rotateClockwise();
                     shootTimer.start();
                     setPathState(6);
                 }

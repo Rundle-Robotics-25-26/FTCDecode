@@ -1,12 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-import java.util.LinkedList;
-import java.util.Queue;
+import org.firstinspires.ftc.teamcode.RobotTimer;
 
 public class Indexer {
     private HardwareMap hardwareMap;
@@ -105,44 +103,44 @@ public class Indexer {
         }
     }
     public void Update() {
-         switch (currentState) {
-             case IDLE:
-                 // do nothing?
-                 break;
-             case INDEXING_UP:
-                 if (indexerTimer.IsDone()) {
-                     indexer.setPosition(INDEXER_START);
-                     indexerTimer.start();
-                     currentState = State.INDEXING_DOWN;
-                 }
-                 break;
-             case INDEXING_DOWN:
-                 if (indexerTimer.IsDone()) {
-                     if (shootingAndSpinning) {
-                         currentState = State.SPINNING;
-                         shootingAndSpinning = false;
-                         spindexer.rotateClockwise(false);
-                         spindexerSpinningTimer.start();
-                     } else if (shootingAndSpinningALL > 0) {
+        switch (currentState) {
+            case IDLE:
+                // do nothing?
+                break;
+            case INDEXING_UP:
+                if (indexerTimer.IsDone()) {
+                    indexer.setPosition(INDEXER_START);
+                    indexerTimer.start();
+                    currentState = State.INDEXING_DOWN;
+                }
+                break;
+            case INDEXING_DOWN:
+                if (indexerTimer.IsDone()) {
+                    if (shootingAndSpinning) {
+                        currentState = State.SPINNING;
+                        shootingAndSpinning = false;
+//                         spindexer.rotateClockwise(false);
+                        spindexerSpinningTimer.start();
+                    } else if (shootingAndSpinningALL > 0) {
                         currentState = State.SPINNING;
                         shootingAndSpinningALL--;
-                        spindexer.rotateClockwise(false);
+//                        spindexer.rotateClockwise(false);
                         spindexerSpinningTimer.start();
-                     } else {
-                         currentState = State.IDLE;
-                     }
-                 }
-                 break;
-             case SPINNING:
-                 if (spindexerSpinningTimer.IsDone()) {
-                     if (shootingAndSpinningALL > 0) {
-                         Index();
-                     } else {
-                         currentState = State.IDLE;
-                     }
-                 }
-                 break;
-         }
+                    } else {
+                        currentState = State.IDLE;
+                    }
+                }
+                break;
+            case SPINNING:
+                if (spindexerSpinningTimer.IsDone()) {
+                    if (shootingAndSpinningALL > 0) {
+                        Index();
+                    } else {
+                        currentState = State.IDLE;
+                    }
+                }
+                break;
+        }
 
         telemetry.addData("Current indexer position", indexer.getPosition());
         telemetry.addData("State", currentState);

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 public class ColorScanning {
     private ColorSensor colorSensor;

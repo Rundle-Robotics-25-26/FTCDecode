@@ -1,20 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes.autos;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.PathChain;
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.Indexer;
-import org.firstinspires.ftc.teamcode.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.RobotTimer;
-import org.firstinspires.ftc.teamcode.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 @Autonomous(name = "Blue 3 auto hard code", group = "Actual Auto")
 public class HardCodeBlue extends OpMode {
@@ -76,7 +70,7 @@ public class HardCodeBlue extends OpMode {
                 break;
             case 3:
                 if (shootTimer.IsDone()) {
-                    spindexer.rotateClockwise(false);
+                    spindexer.rotateClockwise();
                     shootTimer.start();
                     setPathState(4);
                 }
@@ -90,7 +84,7 @@ public class HardCodeBlue extends OpMode {
                 break;
             case 5:
                 if (shootTimer.IsDone()) {
-                    spindexer.rotateClockwise(false);
+                    spindexer.rotateClockwise();
                     shootTimer.start();
                     setPathState(6);
                 }

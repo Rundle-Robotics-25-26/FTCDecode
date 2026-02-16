@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Limelight;
+import org.firstinspires.ftc.teamcode.subsystems.Limelight;
 
 //@Autonomous(name = "Limelight Distance Test")
 public class LimelightDistanceTest extends OpMode {

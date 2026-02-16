@@ -14,8 +14,8 @@
 //import com.qualcomm.robotcore.hardware.CRServo;
 //import com.qualcomm.robotcore.hardware.DcMotor;
 //import org.firstinspires.ftc.teamcode.RobotFunctions;
-//import org.firstinspires.ftc.teamcode.Indexer;
-//import org.firstinspires.ftc.teamcode.Spindexer;
+//import org.firstinspires.ftc.teamcode.subsystems.Indexer;
+//import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 //
 //import java.util.function.Supplier;
 //

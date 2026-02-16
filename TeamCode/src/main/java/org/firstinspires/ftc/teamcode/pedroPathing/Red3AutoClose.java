@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 import org.firstinspires.ftc.teamcode.RobotTimer;
-import org.firstinspires.ftc.teamcode.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 @Autonomous(name = "Red 3 auto close", group = "Auto")
 public class Red3AutoClose extends OpMode {

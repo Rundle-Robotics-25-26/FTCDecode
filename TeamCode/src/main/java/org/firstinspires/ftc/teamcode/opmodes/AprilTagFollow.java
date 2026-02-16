@@ -2,11 +2,10 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Limelight;
+import org.firstinspires.ftc.teamcode.subsystems.Limelight;
 
 import java.util.List;
 

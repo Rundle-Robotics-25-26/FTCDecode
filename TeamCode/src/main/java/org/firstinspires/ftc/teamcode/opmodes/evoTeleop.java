@@ -1,18 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.pedropathing.follower.Follower; // { changed code }
-import com.pedropathing.geometry.Pose;     // { changed code }
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants; // { changed code }
-
-import org.firstinspires.ftc.teamcode.Indexer;
 //import org.firstinspires.ftc.teamcode.SimpleTurret;
-import org.firstinspires.ftc.teamcode.SimpleTurret;
-import org.firstinspires.ftc.teamcode.Spindexer;
+
 
 public class evoTeleop  {
 /*

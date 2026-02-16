@@ -1,8 +1,7 @@
 // Not done yet
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import android.app.Activity;
@@ -10,7 +9,7 @@ import android.graphics.Color;
 import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
-import com.bylazar.telemetry.PanelsTelemetry;
+
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;

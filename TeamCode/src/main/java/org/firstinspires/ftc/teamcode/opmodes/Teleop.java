@@ -2,30 +2,30 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Indexer;
+import org.firstinspires.ftc.teamcode.subsystems.Indexer;
 //import org.firstinspires.ftc.teamcode.SimpleTurret;
-import org.firstinspires.ftc.teamcode.Intake;
-import org.firstinspires.ftc.teamcode.SimpleTurret;
-import org.firstinspires.ftc.teamcode.Spindexer;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.subsystems.PIDFShooter;
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer;
 
 @TeleOp(name = "Teleop", group = "Drive")
 public class Teleop extends OpMode {
 
     // Motor declarations
-    private DcMotor frontLeft, frontRight, backLeft, backRight, shooter, spinner, LeftIntake;
+    private DcMotor frontLeft, frontRight, backLeft, backRight, spinner, LeftIntake;
     DcMotor LeftServo, RightServo;
+    private double dist;
 
     boolean pressedTriangle, pressedSquare, pressedCross, shooterOn = false;
     private double currentShooterPower = 0.0;
 
     private final Spindexer spindexer = new Spindexer();
-    private final SimpleTurret simpleTurret = new SimpleTurret();
 
     private final Indexer indexer = new Indexer();
     private final Intake intake = new Intake();
+    private final PIDFShooter shooter = new PIDFShooter();
     boolean spindexerDirection = true;
 
     @Override
@@ -35,8 +35,6 @@ public class Teleop extends OpMode {
         backLeft = hardwareMap.get(DcMotor.class, "lr");
         frontRight = hardwareMap.get(DcMotor.class, "rf");
         backRight = hardwareMap.get(DcMotor.class, "rr");
-
-        spinner = hardwareMap.get(DcMotor.class, "motor2");
 
         // Set motor directions (adjust based on your robot's configuration)
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -58,14 +56,10 @@ public class Teleop extends OpMode {
         // ==== Spindexer setup ====
         spindexer.freshInit(hardwareMap);
 
-        // ==== Simple turret setup ====
-        //simpleTurret.Init(hardwareMap);
 
         // ==== Shooter setup ====
-        shooter = hardwareMap.get(DcMotor.class, "shooter");
         // FIX: Use RUN_WITHOUT_ENCODER for consistent power output
-        shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        shooter.Init(hardwareMap);
 
         // ==== Indexer setup ====
         indexer.Init(hardwareMap, telemetry, spindexer);
@@ -133,6 +127,7 @@ public class Teleop extends OpMode {
         }
         indexer.Update();
 
+        spindexer.update();
 
         // ==== Spindexer ====
         telemetry.addData("Is Spindexer busy? ", spindexer.spindexer.isBusy());
