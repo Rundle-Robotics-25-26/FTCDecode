@@ -54,7 +54,7 @@ public class Teleop extends OpMode {
 
 
         // ==== Spindexer setup ====
-        spindexer.freshInit(hardwareMap);
+        spindexer.dataInit(hardwareMap);
 
 
         // ==== Shooter setup ====
